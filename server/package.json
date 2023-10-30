@@ -1,16 +1,19 @@
 {
-  "name": "server",
+  "name": "track-records-server",
   "version": "1.0.0",
-  "main": "index.js",
-  "license": "MIT",
+  "description": "Server for our Senior Design project that handles all the business logic, such as processing data, retreiving data, and sending data to the client and database.",
+  "main": "server.js",
   "scripts": {
-    "start": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "body-parser": "^1.20.2",
     "express": "^4.18.2",
-    "moment": "^2.29.4",
-    "mongoose": "^7.6.2",
+    "firebase": "^10.5.2",
     "nodemon": "^3.0.1"
-  }
+  },
+  "type": "module"
 }

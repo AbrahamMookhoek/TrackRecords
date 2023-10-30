@@ -1,9 +1,0 @@
-{
-  "dependencies": {
-    "@fullcalendar/core": "^6.1.9",
-    "@fullcalendar/daygrid": "^6.1.9",
-    "@fullcalendar/react": "^6.1.9",
-    "react-datetime": "^3.2.0",
-    "react-modal": "^3.16.1"
-  }
-}
