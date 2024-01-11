@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import Header from '@/components/Header'
 import Image from 'next/image'
@@ -10,7 +10,7 @@ import { signOut } from 'firebase/auth'
 export default function Home() {
   const [user] = useAuthState(auth);
   const router = useRouter()
-  const userSession = sessionStorage.getItem('user');
+  const userSession = window.sessionStorage.getItem('user');
 
   console.log({user})
  

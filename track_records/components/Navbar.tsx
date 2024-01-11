@@ -3,6 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { NAV_LINKS } from '@/constants'
 import Button from './Button'
+import LogoutButton from './LogoutButton'
 
 const Navbar = () => {
   return (
@@ -20,8 +21,8 @@ const Navbar = () => {
         </ul>
 
         <div className="lg:flexCenter hidden">
-        <Link href="/">
-                <Button
+        <Link href="http://localhost:3000/dashboard/calendar">
+                <LogoutButton
                     type="button"
                     title="Logout"
                     icon="/user.svg"

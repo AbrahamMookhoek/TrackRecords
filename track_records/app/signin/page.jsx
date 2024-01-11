@@ -14,12 +14,17 @@ const SignIn = () => {
 
   const handleSignIn = async () => {
     try {
-        const res = await signInWithEmailAndPassword(email, password);
-        console.log({res});
-        sessionStorage.setItem('user', true)
-        setEmail('');
-        setPassword('');
-        router.push('/dashboard/calendar')
+        const res = await signInWithEmailAndPassword(email, password).catch(e => {
+          console.log(e)
+        })
+
+        if(res)
+        {
+          window.sessionStorage.setItem('user', true)
+          setEmail('');
+          setPassword('');
+          router.push('/dashboard/calendar')
+        }
     }catch(e){
         console.error(e)
     }
