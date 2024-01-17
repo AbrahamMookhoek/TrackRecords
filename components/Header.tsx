@@ -4,7 +4,6 @@ import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { HEADER_LINKS } from '@/constants'
-import Button from './Button'
 import { signIn } from 'next-auth/react'
 
 const Header = () => {

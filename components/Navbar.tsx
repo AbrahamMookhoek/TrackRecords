@@ -31,20 +31,9 @@ const Navbar = () => {
           ))}
         </ul>
 
-        <div className="lg:flexCenter">
-          <Link href="http://localhost:3000/dashboard/calendar">
-            <LogoutButton
-              type="button"
-              title="Logout"
-              icon="/user.svg"
-              variant="btn_dark_green"
-            />
-          </Link>
-        </div>
-
         <div className="lg:flexcenter">
           <button className="bold-16 btn_dark_green" onClick={() => signOut()}>
-            Sign in with Spotify
+            Logout of Spotify
           </button>
         </div>
 
