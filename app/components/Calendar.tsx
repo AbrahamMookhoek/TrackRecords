@@ -15,7 +15,7 @@ export default function () {
     return ( 
         <section>
 
-            <div >
+            <div className='padding-container'>
                 <FullCalendar
                     ref={calendarRef}
                     events={events}
