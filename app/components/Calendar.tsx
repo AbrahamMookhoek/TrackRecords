@@ -15,12 +15,13 @@ export default function () {
     return ( 
         <section>
 
-            <div style={{position: 'relative', zIndex: 0}}>
+            <div >
                 <FullCalendar
                     ref={calendarRef}
                     events={events}
                     plugins={[ dayGridPlugin ]}
                     initialView='dayGridMonth'
+                    showNonCurrentDates={false}
                 />
             </div>
 

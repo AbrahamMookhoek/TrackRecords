@@ -4,7 +4,6 @@ import { getServerSession } from 'next-auth'
 import { options } from './api/auth/[...nextauth]/options'
 import SessionProvider from './SessionProvider'
 import Home from './page'
-import CalendarPage from './dashboard/calendar/page'
 import Dashboard from './dashboard/page'
  
 
@@ -26,11 +25,7 @@ export default async function RootLayout({ children, }: { children: React.ReactN
     <html lang="en">
       <body className={inter.className}>
         <SessionProvider session={session}>
-          {!session ? (
-            <Home/>
-          ): (
-            <Dashboard/>
-          )}
+          {session ? (<Dashboard/>) : (<Home />)}
         </SessionProvider>
       </body>
     </html>

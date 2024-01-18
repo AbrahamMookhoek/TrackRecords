@@ -2,11 +2,15 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { NAV_LINKS } from "@/constants";
-import Button from "./Button";
-import LogoutButton from "./LogoutButton";
-import { signOut } from "next-auth/react";
+import UserSignInButton from "./UserSignInButton";
+import { getServerSession } from "next-auth";
+import { options } from "@/app/api/auth/[...nextauth]/options";
 
-const Navbar = () => {
+
+const Navbar = async () => {
+  const session = await getServerSession(options)
+
+  const sessionBool = session != undefined ? true : false
   return (
     <>
       <nav className="flexBetween max-container padding-container relative z-30 py-5">
@@ -31,11 +35,7 @@ const Navbar = () => {
           ))}
         </ul>
 
-        <div className="lg:flexcenter">
-          <button className="bold-16 btn_dark_green" onClick={() => signOut()}>
-            Logout of Spotify
-          </button>
-        </div>
+        <UserSignInButton type="button" icon="/user.svg" variant="btn_dark_green" session={sessionBool}/>
 
         <Image
           src="menu.svg"

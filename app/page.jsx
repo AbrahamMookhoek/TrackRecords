@@ -1,18 +1,19 @@
-import Header from "@/components/Header";
+import Header from "@/app/components/Header";
 import Image from "next/image";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/app/firebase/config";
 import { useRouter } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { options } from "./api/auth/[...nextauth]/options";
-import Footer from "@/components/Footer";
+import Footer from "@/app/components/Footer";
+import Navbar from "@/app/components/Navbar";
 
 export default async function Home() {
-  const session = getServerSession(options);
+  const session = await getServerSession(options);
   return (
     <>
       <main>
-        <Header />
+        <Navbar />
         <br></br>
         <div className="flexCenter padding-container">
           <h1 className="bold-64">

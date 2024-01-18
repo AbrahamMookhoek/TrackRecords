@@ -2,8 +2,8 @@ import type { NextAuthOptions } from 'next-auth'
 import SpotifyProvider from 'next-auth/providers/spotify'
 import CredentialsProvider from 'next-auth/providers/credentials'
 
+import { app } from '../../../firebase/config'
 import { FirestoreAdapter } from '@auth/firebase-adapter'
-import { cert } from 'firebase-admin/app'
 
 const spotifyScopes = {
 
@@ -11,13 +11,7 @@ const spotifyScopes = {
 
 export const options: NextAuthOptions = {
 
-    adapter: FirestoreAdapter({
-        credential: cert({
-            projectId: process.env.FIREBASE_PROJECT_ID,
-            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-            privateKey: process.env.FIREBASE_PRIVATE_KEY!.replace(/\\n/g, '\n'),
-        })
-    }),
+    adapter: FirestoreAdapter( app ),
     
     pages: {
         signIn: '/auth/signin',
