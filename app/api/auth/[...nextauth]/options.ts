@@ -1,18 +1,12 @@
 import type { NextAuthOptions } from 'next-auth'
 import SpotifyProvider from 'next-auth/providers/spotify'
-import CredentialsProvider from 'next-auth/providers/credentials'
 
-import { app } from '../../../firebase/config'
+import { app, db } from '../../../firebase/config'
 import { FirestoreAdapter } from '@auth/firebase-adapter'
 
-const spotifyScopes = {
-
-}
-
 export const options: NextAuthOptions = {
-
-    adapter: FirestoreAdapter( app ),
-    
+    secret: process.env.NEXTAUTH_SECRET,
+    adapter: FirestoreAdapter(app),
     pages: {
         signIn: '/auth/signin',
         signOut: '/auth/signout',
@@ -20,43 +14,32 @@ export const options: NextAuthOptions = {
         verifyRequest: '/auth/verify-request', // (used for check email message)
         newUser: '/auth/new-user' // New users will be directed here on first sign in (leave the property out if not of interest)
     },
-
+    
     providers: [
         SpotifyProvider({
             clientId: process.env.SPOTIFY_CLIENT_ID,
             clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-            // authorization: `https://accounts.spotify.com/authorize?scope=ugc-image-upload&user-read-private&user-read-email`
+            authorization: `https://accounts.spotify.com/authorize?scope=ugc-image-upload,user-read-private,user-read-email`
           }),
-        
-        CredentialsProvider({
-            name: "Credentials",
-            credentials: {
-                username: {
-                    label: "Username:",
-                    type: "text",
-                    placeholder: "Your Username"
-                },
-                password: {
-                    label: "Password:",
-                    type: "password",
-                    placeholder: "Your Password"
-                }
-            },
-            async authorize(credentials) {
-                // This is where you need to retrieve user data
-                // to verify with credentials
-                // Docs: https:next-auth.js.org/configuration/providers/credentials
-                const user = { id: "42", name: "Dave", password: "nextauth" }
-
-                if (credentials?.username === user.name && credentials?.password == user.password)
-                {
-                    return user
-                }
-                else
-                {
-                    return null
-                }
-            }
-        })
     ],
+    callbacks: {
+        async jwt({token, account}){
+            if (account) {
+                token.spotify_access_token = account.access_token
+                token.spotify_refresh_token = account.refresh_token
+            }
+            return token
+        },
+        async session({session, token}){
+            if (session){
+                session.user.spotify_access_token = token.spotify_access_token
+                session.user.spotify_refresh_token = token.spotify_refresh_token
+            }
+            
+            return session
+        }
+    },
+    session: {
+        strategy: "jwt"
+    }
 }

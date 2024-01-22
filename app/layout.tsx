@@ -6,7 +6,6 @@ import SessionProvider from './SessionProvider'
 import Home from './page'
 import Dashboard from './dashboard/page'
  
-
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
@@ -19,6 +18,7 @@ export default async function RootLayout({ children, }: { children: React.ReactN
 
   if (session){
     console.log("Printed in root level layout " + session.user.email)
+    console.log("Printed in root level layout " + session.user.spotify_access_token)
   }
   
   return (

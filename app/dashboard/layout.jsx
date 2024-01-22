@@ -10,7 +10,7 @@ export const metadata = {
   description: 'Music Analytics Web App',
 }
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>

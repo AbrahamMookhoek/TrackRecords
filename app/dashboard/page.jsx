@@ -1,4 +1,5 @@
 import Calendar from "@/app/components/Calendar";
+import CalendarPage from '@/app/dashboard/calendar/page'
 import Footer from "@/app/components/Footer";
 import Navbar from "@/app/components/Navbar";
 
@@ -7,7 +8,7 @@ export default function Dashboard() {
     <>
       <Navbar />
       <div>
-        <Calendar />
+        <CalendarPage />
       </div>
       <br />
       <Footer />
