@@ -19,5 +19,6 @@ declare module 'next-auth/jwt'{
     interface JWT extends DefaultJWT{
         spotify_access_token?: string,
         spotify_refresh_token?: string,
+        access_token_expires?: number,
     }
 }

@@ -10,11 +10,7 @@ import Navbar from "@/app/components/Navbar";
 
 export default async function Home() {
   const session = await getServerSession(options);
-
-  if(session){
-    redirect("/dashboard")
-  }
-
+  
   return (
     <>
       <main>

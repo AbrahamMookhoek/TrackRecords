@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 
 type ButtonProps = {
   type: "button" | "submit";
@@ -18,7 +18,10 @@ const UserSignInButton = ({ type, icon, variant, session }) => {
         <button
           type={type}
           className={`flexCenter gap-3 rounded-full border ${variant}`}
-          onClick={() => signOut()}
+          onClick={() => signOut({
+            redirect: true,
+            callbackUrl: `${window.location.origin}/`
+          })}
         >
           {icon && (
             <Image src={icon} alt={"Logout Button"} width={24} height={24} />
