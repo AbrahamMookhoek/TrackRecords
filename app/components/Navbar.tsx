@@ -13,17 +13,12 @@ const Navbar = async () => {
   const sessionBool = session != undefined ? true : false
   return (
     <>
-      <nav className="flexBetween max-container padding-container relative z-30 py-5">
+      <nav className="w-full flexBetween max-container padding-container relative z-30 py-5">
         <Link href="/">
-          <Image
-            src="/TrackRecordsLogo.png"
-            alt="logo"
-            width={70}
-            height={70}
-          />
+          <h3 className="text-2xl font-Lobster">Track Records</h3>
         </Link>
 
-        <ul className="hidden h-full gap-12 lg:flex">
+        {/* <ul className="hidden h-full gap-12 lg:flex">
           {NAV_LINKS.map((link) => (
             <Link
               href={link.href}
@@ -33,7 +28,7 @@ const Navbar = async () => {
               {link.label}
             </Link>
           ))}
-        </ul>
+        </ul> */}
 
         <UserSignInButton type="button" icon="/user.svg" variant="btn_dark_green" session={sessionBool}/>
 
