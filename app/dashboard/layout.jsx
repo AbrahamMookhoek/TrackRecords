@@ -1,7 +1,7 @@
 import { Inter } from 'next/font/google'
-import './globals.css'
-import Navbar from '@/components/Navbar'
-import Footer from '@/components/Footer'
+import '../globals.css'
+import Navbar from '@/app/components/Navbar'
+import Footer from '@/app/components/Footer'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -10,14 +10,15 @@ export const metadata = {
   description: 'Music Analytics Web App',
 }
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <main className="relative overflow-hidden">
+        {/* <Navbar/> */}
+        <main className="overflow-hidden">
           {children}
         </main>
-        <Footer/>
+        {/* <Footer/> */}
       </body>
     </html>
   )

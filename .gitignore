@@ -34,3 +34,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# google firebase
+track-records-be887-firebase-adminsdk-ld6q5-b55783fdcb.json

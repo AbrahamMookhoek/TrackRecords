@@ -1,8 +1,10 @@
+'use client'
+
 import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { HEADER_LINKS } from '@/constants'
-import Button from './Button'
+import { signIn } from 'next-auth/react'
 
 const Header = () => {
 
@@ -21,14 +23,7 @@ const Header = () => {
         </ul>
 
         <div className="lg:flexCenter hidden">
-            <Link href="/signin">
-                <Button
-                    type="button"
-                    title="Sign In"
-                    icon="/user.svg"
-                    variant="btn_dark_green"
-                />
-            </Link>
+            <button className="bold-16 btn_dark_green" onClick={() => signIn('spotify')}>Sign in with Spotify</button>
         </div>
 
         <Image
