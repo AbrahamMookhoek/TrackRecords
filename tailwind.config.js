@@ -1,5 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  mode: 'jit', 
+  // purge: 'look this up, could make stuff faster by removing unused styles', 
   content: [
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -28,6 +30,9 @@ module.exports = {
         yellow: {
           50: '#FEC601',
         },
+      },
+      fontFamily: {
+        'Lobster': ['Lobster', 'sans-serif'],
       },
       backgroundImage: {
         'bg-img-1': "url('/img-1.png')",

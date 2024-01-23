@@ -17,17 +17,18 @@ export default async function Home() {
 
   return (
     <>
-      <main>
+      <main className="flex flex-col h-screen justify-between">
         <Navbar />
         <br></br>
-        <div className="flexCenter padding-container">
+        <div className="flexCenter padding-container flex-auto">
           <h1 className="bold-64">
-            TODO: MAKE SPLASH PAGE SHOWING WHAT WEBSITE IS ABOUT
+            Listening history, stats, journal all-in-one.
           </h1>
         </div>
         <br></br>
+        <Footer />
       </main>
-      <Footer />
+      
     </>
   );
 }

@@ -58,29 +58,22 @@ export const NAV_LINKS = [
   // FOOTER SECTION
   export const FOOTER_LINKS = [
     {
-      title: 'Learn More',
-      links: [
-        'About Track Records',
-        'idk1',
-        'idk2',
-        'idk3',
-        'idk4',
-        'Contact Us',
-      ],
+      title: 'About Track Records',
+      link: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
     },
     {
-      title: 'IDK',
-      links: ['idk1', 'idk2', 'idk3'],
+      title: 'UTA',
+      link: 'https://www.uta.edu/academics/schools-colleges/engineering/academics/departments/cse',
+    },
+    {
+      title: 'Github',
+      link: 'https://github.com/AbrahamMookhoek/TrackRecords',
+    },
+    {
+      title: 'Spotify Reference',
+      link: 'https://developer.spotify.com/',
     },
   ];
-  
-  export const FOOTER_CONTACT_INFO = {
-    title: 'Contact Us',
-    links: [
-      { label: 'Admin Officer', value: '123-456-7890' },
-      { label: 'Email Officer', value: 'SOMEBODY@SOMETHING.COM' },
-    ],
-  };
   
   export const SOCIALS = {
     title: 'Social',
