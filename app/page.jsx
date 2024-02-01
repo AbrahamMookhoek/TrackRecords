@@ -1,8 +1,3 @@
-import Header from "@/app/components/Header";
-import Image from "next/image";
-import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "@/app/firebase/config";
-import { redirect, useRouter } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { options } from "./api/auth/[...nextauth]/options";
 import Footer from "@/app/components/Footer";

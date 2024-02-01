@@ -18,20 +18,21 @@ const Navbar = async () => {
           <h3 className="font-Lobster text-2xl">Track Records</h3>
         </Link>
 
-        <ul className="hidden h-full gap-12 lg:flex">
-          {NAV_LINKS.map((link) => (
-            <Link
-              href={link.href}
-              key={link.key}
-              className="regular-16 flexCenter cursor-pointer pb-1.5 text-gray-50 transition-all hover:font-bold"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </ul>
-
         {sessionBool ? (
-          <UserProfile />
+          <>
+            <ul className="hidden h-full gap-12 lg:flex">
+              {NAV_LINKS.map((link) => (
+                <Link
+                  href={link.href}
+                  key={link.key}
+                  className="regular-16 flexCenter cursor-pointer pb-1.5 text-gray-50 transition-all hover:font-bold"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </ul>
+            <UserProfile />
+          </>
         ) : (
           <UserSignInButton
             type="button"
