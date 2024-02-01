@@ -10,21 +10,18 @@ import Navbar from "@/app/components/Navbar";
 
 export default async function Home() {
   const session = await getServerSession(options);
-  
+
   return (
     <>
-      <main className="flex flex-col h-screen justify-between">
+      <main className="flex h-screen flex-col justify-between">
         <Navbar />
-        <br></br>
         <div className="flexCenter padding-container flex-auto">
           <h1 className="bold-64">
             Listening history, stats, journal all-in-one.
           </h1>
         </div>
-        <br></br>
         <Footer />
       </main>
-      
     </>
   );
 }
