@@ -13,7 +13,7 @@ export default function () {
   const calendarRef = useRef(null);
 
   return (
-    <div className="relative z-30 w-4/5 p-2 outline">
+    <div className="col-span-5 mr-32 p-2 outline">
       <FullCalendar
         ref={calendarRef}
         events={events}

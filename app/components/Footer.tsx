@@ -2,9 +2,9 @@ import { FOOTER_LINKS } from "@/constants";
 import Link from "next/link";
 import React from "react";
 
-const Footer = () => {
+const Footer = ({ className }) => {
   return (
-    <footer className="flexCenter mb-2">
+    <footer className={className}>
       <div className="padding-container max-container flex-end w-full flex-col gap-2">
         <div className="flex flex-col items-start justify-center gap-[10%] md:flex-row">
           <div className="flex flex-wrap gap-10 sm:justify-between md:flex-1">

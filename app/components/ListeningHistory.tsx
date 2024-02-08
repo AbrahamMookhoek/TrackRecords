@@ -10,13 +10,13 @@ import TrackCard from "./TrackCard";
 
 export default function () {
   return (
-    <div className="padding-container relative z-30 flex w-1/5 flex-col outline">
+    <div className="col-span-2 ml-32 flex flex-col outline">
       <div className="flex w-full justify-center py-2">
         <h2 className="text-2xl">Listening History</h2>
       </div>
       <div
-        style={{ height: "85%" }}
-        className=" flex flex-col overflow-auto outline"
+        style={{ height: "90%", maxHeight: "90%" }}
+        className="flex max-h-min flex-col overflow-auto outline"
       >
         <List>
           <ListItem>
@@ -46,12 +46,24 @@ export default function () {
           <ListItem>
             <TrackCard />
           </ListItem>
-          {/* <ListItem>
-              <TrackCard />
-            </ListItem> */}
+          <ListItem>
+            <TrackCard />
+          </ListItem>
+          <ListItem>
+            <TrackCard />
+          </ListItem>
+          <ListItem>
+            <TrackCard />
+          </ListItem>
+          <ListItem>
+            <TrackCard />
+          </ListItem>
+          <ListItem>
+            <TrackCard />
+          </ListItem>
         </List>
       </div>
-      <div className="flex-end flex w-full justify-center py-2">
+      <div className="flex w-full justify-center py-2">
         <Button variant="contained" startIcon={<Add />} color="success">
           New Journal Entry
         </Button>
