@@ -1,15 +1,6 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import {
-  Card,
-  CardContent,
-  Typography,
-  CardMedia,
-  Box,
-  IconButton,
-} from "@mui/material";
-import Image from "next/image";
 
 export default function () {
   return (
