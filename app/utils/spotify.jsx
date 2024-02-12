@@ -1,5 +1,5 @@
 import { Track } from "../shared_objects/Track";
-import { writeToFirestore } from "@/app/firebase/firebase"
+import { writeTracksToFirestore } from "@/app/firebase/firebase"
 
 export default async function refreshAccessToken(refresh_token){
     var refresh_token = refresh_token;
@@ -161,5 +161,5 @@ export async function spotifyGetSavedTracks(access_token, user_name) {
     // console.log("\n")
   }
 
-  await writeToFirestore(user_name, tracks);
+  await writeTracksToFirestore(user_name, tracks);
 }

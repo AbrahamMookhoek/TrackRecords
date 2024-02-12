@@ -7,14 +7,14 @@ import { options } from "@/app/api/auth/[...nextauth]/options";
 import { spotifyGetSavedTracks } from "@/app/utils/spotify";
 
 import ListeningHistory from "@/app/components/ListeningHistory";
-import { readFromFirestore } from "@/app/firebase/firebase";
+import { readTracksFromFirestore } from "@/app/firebase/firebase";
 
 export default async function Dashboard() {
   const session = await getServerSession(options);
   
   if (session) {
     await spotifyGetSavedTracks(session.user.spotify_access_token, session.user?.name);
-    var tracks = await readFromFirestore(session.user?.name);
+    var tracks = await readTracksFromFirestore(session.user?.name);
   }
 
   return (
