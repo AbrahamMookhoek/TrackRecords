@@ -14,21 +14,17 @@ module.exports = {
           50: "#30AF5B",
           90: "#292C27",
         },
-        gray: {
-          10: "#EEEEEE",
-          20: "#A2A2A2",
-          30: "#7B7B7B",
-          50: "#585858",
-          90: "#141414",
+        navy: {
+          100: "#161A30",
         },
-        orange: {
-          50: "#FF814C",
+        purple: {
+          100: "#31304D",
         },
-        blue: {
-          70: "#021639",
+        light_blue: {
+          100: "#B6BBC4",
         },
-        yellow: {
-          50: "#FEC601",
+        off_white: {
+          100: "#F0ECE5",
         },
       },
       fontFamily: {
