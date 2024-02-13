@@ -13,6 +13,7 @@
 
 body {
   font-family: Inter;
+  color: white;
 }
 
 @layer utilities {
@@ -143,6 +144,11 @@ body {
 .hide-scrollbar {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
+}
+
+/* THIS LOOKS LIKE ASS BUT FIX LATER */
+.fc-day:hover {
+  border: 1px solid red;
 }
 
 /* @tailwind base;

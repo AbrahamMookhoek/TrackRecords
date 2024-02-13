@@ -13,7 +13,7 @@ export default function () {
   const { isEventSelected, setEventSelected } = useCalendarStore();
 
   return (
-    <div className="col-span-2 ml-32 mr-1 flex flex-col overflow-auto rounded-lg shadow-lg">
+    <div className="bg-light_blue-100 col-span-2 ml-32 mr-1 flex flex-col overflow-auto rounded-lg text-black shadow-lg">
       <div className="flex w-full justify-center py-2">
         <h2 className="text-2xl">Today's Tracks</h2>
       </div>
@@ -64,7 +64,9 @@ export default function () {
             </ListItem>
           </List>
         ) : (
-          <h4>No Date Selected</h4>
+          <h4 className="ml-4 flex max-h-min flex-col items-stretch overflow-auto">
+            No Date Selected
+          </h4>
         )}
       </div>
       <div className="flex w-full justify-center py-2">

@@ -59,7 +59,7 @@ export default function () {
   };
 
   return (
-    <div className="col-span-5 mr-32 rounded-lg p-2 shadow-lg">
+    <div className="bg-light_blue-100 col-span-5 mr-32 rounded-lg p-2 shadow-lg text-black">
       <FullCalendar
         ref={calendarRef}
         events={events}
