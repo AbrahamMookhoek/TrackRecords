@@ -56,36 +56,8 @@ export const useCalendarStore = create((set) => ({
       tracks: [...state.tracks, ...newTracks];
     }),
 
-  events: [
-    {
-      title: "XYZ Added",
-      start: "2024-02-08",
-      color: "green",
-      id: "newTrack",
-    },
-    {
-      title: "XYZ Listened",
-      start: "2024-02-08",
-      color: "gray",
-      id: "listenedTrack",
-    },
-    {
-      title: "XYZ Added",
-      start: "2024-02-12",
-      color: "green",
-      id: "newTrack",
-    },
-    {
-      title: "XYZ Listened",
-      start: "2024-02-12",
-      color: "gray",
-      id: "listenedTrack",
-    },
-  ],
-  setEvents: (newEvents) =>
-    set((state) => {
-      events: [...state.events, ...newEvents];
-    }),
+  events: [],
+  setEvents: (newEvents) => set({ events: newEvents }),
 
   isEventSelected: false,
   setEventSelected: (value) => set({ isEventSelected: value }),

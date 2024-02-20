@@ -18,28 +18,12 @@ export default function Calendar({ user }) {
   const calendarRef = useRef(null);
 
   const { events, setEvents } = useCalendarStore();
-  const { tracks, setTracks } = useTrackStore();
   const { isEventSelected, setEventSelected } = useCalendarStore();
-
-  // const createEvents = () => {
-  //   let tempEvents = [];
-  //   let trackMap = new Map();
-
-  //   tracks.forEach((track) => {
-  //     if(trackMap.get(track.dateListened) < 1) {
-  //       trackMap.set(track.dateListened, 1)
-  //     }
-  //     else {
-
-  //     }
-
-  //     tempEvents.push({title: "XYZ Added", start: track.dateListened, color: "green", id: "newTrack"});
-  //   });
-  // };
+  // const { tracks, setTracks } = useTrackStore();
+  const tracks = useTrackStore((state) => state.tracks);
+  const setTracks = useTrackStore((state) => state.setTracks);
 
   const dayClicked = (info) => {
-    // createEvents();
-
     // If the user clicked on an Event, then we know events are in that day
     // So just set isEventSelected
     if (info?.event?.startStr) {
@@ -47,7 +31,6 @@ export default function Calendar({ user }) {
     }
     // This means the user clicked on a day
     else {
-      //
       const filteredEvents = events.filter(
         (event) => event.start === info.dateStr,
       );
@@ -70,41 +53,30 @@ export default function Calendar({ user }) {
   });
 
   useEffect(() => {
-    if(status == "pending")
-    {
-      if(isLoading)
-      {
-        // console.log("Data not received yet")
-      }
+    if (status == "success") {
+      console.log(data);
+      setTracks(data);
+      // console.log(createCalendarEvents(data));
+      setEvents(createCalendarEvents(data));
+      // if you change (data) to (tracks) it breaks
     }
-    else if (status == "success"){
-      setTracks(data)
-      
-      if(tracks != undefined)
-      {
-        var returnedEvents = createCalendarEvents(tracks)
-        // setEvents(returnedEvents)
-      }
-    }
-  }, [data, tracks]);
+  }, [data]);
 
   return (
-    <>
-      <div className="col-span-5 mr-32 rounded-lg bg-light_blue-100 p-2 text-black shadow-lg">
-        <FullCalendar
-          ref={calendarRef}
-          events={events}
-          eventClick={dayClicked}
-          // eventDisplay="background"
-          plugins={[dayGridPlugin, interactionPlugin]}
-          initialView="dayGridMonth"
-          showNonCurrentDates={false}
-          height={"100%"}
-          dateClick={dayClicked}
-          // eventDidMount={addIconToEvent}
-        />
-      </div>
-    </>
+    <div className="col-span-5 mr-32 rounded-lg bg-light_blue-100 p-2 text-black shadow-lg">
+      <FullCalendar
+        ref={calendarRef}
+        events={events}
+        eventClick={dayClicked}
+        // eventDisplay="background"
+        plugins={[dayGridPlugin, interactionPlugin]}
+        initialView="dayGridMonth"
+        showNonCurrentDates={false}
+        height={"100%"}
+        dateClick={dayClicked}
+        // eventDidMount={addIconToEvent}
+      />
+    </div>
   );
 }
 

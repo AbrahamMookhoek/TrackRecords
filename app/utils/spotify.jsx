@@ -96,7 +96,7 @@ export async function spotifyGetSavedTracks(access_token, user_name) {
       return response.json();
     })
     .then((result) => {
-      total = result.total
+      total = result.total;
       nextSongBatchLink = result.next;
       count += result.items.length;
 
@@ -140,7 +140,7 @@ export async function spotifyGetSavedTracks(access_token, user_name) {
   //   console.log("Canceling further Spotify calls, no update required")
   //   return;
   // }
-  nextSongBatchLink = null
+
   while (nextSongBatchLink != null) {
     await fetch(nextSongBatchLink, requestOptions)
       .then((response) => response.json())
@@ -189,26 +189,41 @@ export async function spotifyGetSavedTracks(access_token, user_name) {
 
   // await writeTracksToFirestore(user_name, tracks);
 
-  return tracks
+  return tracks;
 }
 
-export function createCalendarEvents(tracks)
-{
-  if(tracks === undefined)
-  {
-    return []
+export function createCalendarEvents(tracks) {
+  if (tracks === undefined) {
+    return [];
   }
-  var events = []
+  var events = [];
 
-  // console.log(tracks[0])
+  const tracksByDay = new Map();
+  tracks.forEach((track) => {
+    // Extract the date part from the timestamp
+    const dateKey = track.added_at.substring(0, 10);
 
-  tracks.forEach(track => {
-    let currTrack = {title: track.track_name, color: "green", start: track.added_at.substring(0,10), id: "addedTrack"}
-    
-    events.push(currTrack)
-  })
+    if (tracksByDay.has(dateKey)) {
+      // If the date key exists, add the track to the existing array
+      tracksByDay.get(dateKey).push(track);
+    } else {
+      // If the date key doesn't exist, create a new array with the track
+      tracksByDay.set(dateKey, [track]);
+    }
+  });
 
-  console.log(events)
+  tracksByDay.forEach((tracksForDate, date) => {
+    console.log(date);
+    let currTrack = {
+      title: tracksForDate.length + " Added",
+      color: "green",
+      start: date,
+      id: "addedTrack",
+    };
+    events.push(currTrack);
+  });
 
-  return events
+  console.log("Events Generated", events);
+
+  return events;
 }
