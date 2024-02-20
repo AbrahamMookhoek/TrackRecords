@@ -2,10 +2,11 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { getServerSession } from "next-auth";
 import { options } from "./api/auth/[...nextauth]/options";
-import SessionProvider from "./SessionProvider";
+import SessionProvider from "./providers/SessionProvider";
 import Home from "./page";
 import Dashboard from "./dashboard/page";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
+import Provider from "./providers/Providers";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -29,11 +30,13 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AppRouterCacheProvider>
-          <SessionProvider session={session}>
-            {session ? <Dashboard /> : <Home />}
-          </SessionProvider>
-        </AppRouterCacheProvider>
+        <Provider>
+          <AppRouterCacheProvider>
+            <SessionProvider session={session}>
+              {session ? <Dashboard /> : <Home />}
+            </SessionProvider>
+          </AppRouterCacheProvider>
+        </Provider>
       </body>
     </html>
   );

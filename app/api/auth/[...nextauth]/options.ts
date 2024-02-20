@@ -9,6 +9,7 @@ import { useSession } from 'next-auth/react'
 import { getServerSession } from 'next-auth'
 
 import refreshAccessToken from '@/app/utils/spotify'
+import { spotifyGetSavedTracks } from '@/app/utils/spotify'
 
 async function refreshToken(token){
     let returnedObj = await refreshAccessToken(token.spotify_refresh_token)
@@ -44,6 +45,10 @@ export const options: NextAuthOptions = {
                 token.spotify_access_token = account.access_token
                 token.spotify_refresh_token = account.refresh_token
                 token.access_token_expires = account.expires_at * 1000
+                user.new_session = true
+
+                console.log("Gathering user spotify songs right now")
+                spotifyGetSavedTracks(token.spotify_access_token, user.name)
 
                 return token
             }

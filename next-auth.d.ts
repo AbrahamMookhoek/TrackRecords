@@ -12,6 +12,7 @@ declare module 'next-auth'{
     interface User extends DefaultUser{
         spotify_access_token?: string,
         spotify_refresh_token?: string,
+        new_session?: boolean,
     }
 }
 

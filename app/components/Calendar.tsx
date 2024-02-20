@@ -6,15 +6,19 @@ import FullCalendar from "@fullcalendar/react";
 import interactionPlugin from "@fullcalendar/interaction";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import { useCalendarStore } from "../store/calendarStore";
+import { useTrackStore } from "../store/trackStore";
 import { IconButton } from "@mui/material";
 import PowerOffIcon from "@mui/icons-material/PowerOff";
 // import { createEvents } from "../utils/trackParser";
 
-export default function () {
+import { useQuery } from "@tanstack/react-query";
+import { createCalendarEvents, spotifyGetSavedTracks } from "../utils/spotify";
+
+export default function Calendar({ user }) {
   const calendarRef = useRef(null);
 
   const { events, setEvents } = useCalendarStore();
-  const { tracks, setTracks } = useCalendarStore();
+  const { tracks, setTracks } = useTrackStore();
   const { isEventSelected, setEventSelected } = useCalendarStore();
 
   // const createEvents = () => {
@@ -58,21 +62,49 @@ export default function () {
     }
   };
 
+  // code to fetch data
+  const { status, data, error, isLoading } = useQuery({
+    queryKey: ["tracks"],
+    queryFn: () => spotifyGetSavedTracks(user.spotify_access_token),
+    notifyOnChangeProps: ["data", "status"],
+  });
+
+  useEffect(() => {
+    if(status == "pending")
+    {
+      if(isLoading)
+      {
+        // console.log("Data not received yet")
+      }
+    }
+    else if (status == "success"){
+      setTracks(data)
+      
+      if(tracks != undefined)
+      {
+        var returnedEvents = createCalendarEvents(tracks)
+        // setEvents(returnedEvents)
+      }
+    }
+  }, [data, tracks]);
+
   return (
-    <div className="bg-light_blue-100 col-span-5 mr-32 rounded-lg p-2 shadow-lg text-black">
-      <FullCalendar
-        ref={calendarRef}
-        events={events}
-        eventClick={dayClicked}
-        // eventDisplay="background"
-        plugins={[dayGridPlugin, interactionPlugin]}
-        initialView="dayGridMonth"
-        showNonCurrentDates={false}
-        height={"100%"}
-        dateClick={dayClicked}
-        // eventDidMount={addIconToEvent}
-      />
-    </div>
+    <>
+      <div className="col-span-5 mr-32 rounded-lg bg-light_blue-100 p-2 text-black shadow-lg">
+        <FullCalendar
+          ref={calendarRef}
+          events={events}
+          eventClick={dayClicked}
+          // eventDisplay="background"
+          plugins={[dayGridPlugin, interactionPlugin]}
+          initialView="dayGridMonth"
+          showNonCurrentDates={false}
+          height={"100%"}
+          dateClick={dayClicked}
+          // eventDidMount={addIconToEvent}
+        />
+      </div>
+    </>
   );
 }
 
