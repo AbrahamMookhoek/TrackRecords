@@ -50,6 +50,7 @@ export default function Calendar({ user }) {
     queryKey: ["tracks"],
     queryFn: () => spotifyGetSavedTracks(user.spotify_access_token),
     notifyOnChangeProps: ["data", "status"],
+    refetchOnWindowFocus: false
   });
 
   useEffect(() => {

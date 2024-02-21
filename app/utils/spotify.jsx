@@ -212,8 +212,12 @@ export function createCalendarEvents(tracks) {
     }
   });
 
+  console.log(tracksByDay)
+
+  
+
   tracksByDay.forEach((tracksForDate, date) => {
-    console.log(date);
+    // console.log(date);
     let currTrack = {
       title: tracksForDate.length + " Added",
       color: "green",
