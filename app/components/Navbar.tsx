@@ -30,7 +30,7 @@ const Navbar = async ({ className }) => {
               </Link>
             ))}
           </ul>
-          <UserProfile />
+          <UserProfile user={session.user}/>
         </>
       ) : (
         <UserSignInButton
