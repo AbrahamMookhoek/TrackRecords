@@ -1,11 +1,8 @@
 import { create } from "zustand";
 
 export const useCalendarStore = create((set) => ({
-  tracks: [],
-  setTracks: (tracksOnDate) => set((state) => { tracks: tracksOnDate}),
-
-  trackDateMap: new Map(),
-  setTrackMap: (trackMap) => set((state) => { trackDateMap: trackMap}),
+  tracksOnDate: [],
+  setTracksOnDate: (newTracksOnDate) => set({ tracksOnDate: newTracksOnDate }),
 
   events: [],
   setEvents: (newEvents) => set({ events: newEvents }),

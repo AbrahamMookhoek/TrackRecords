@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import List from "@mui/material/List";
@@ -11,9 +11,11 @@ import { useCalendarStore } from "../store/calendarStore";
 
 export default function () {
   const { isEventSelected, setEventSelected } = useCalendarStore();
-  const events = useCalendarStore((state) => state.events);
+  const { tracksOnDate } = useCalendarStore();
 
-  console.log(events);
+  useEffect(() => {
+    console.log(tracksOnDate);
+  }, [tracksOnDate]);
 
   return (
     <div className="col-span-2 ml-32 mr-1 flex flex-col overflow-auto rounded-lg bg-light_blue-100 text-black shadow-lg">
@@ -23,9 +25,11 @@ export default function () {
       <div className="flex max-h-min flex-col overflow-auto">
         {isEventSelected ? (
           <List>
-            <ListItem>
-              <TrackCard />
-            </ListItem>
+            {tracksOnDate.map((track) => (
+              <ListItem key={track.spotify_id}>
+                <TrackCard track={track} />
+              </ListItem>
+            ))}
           </List>
         ) : (
           <h4 className="ml-4 flex max-h-min flex-col items-stretch overflow-auto">

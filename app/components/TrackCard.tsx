@@ -2,7 +2,7 @@
 
 import React, { useRef, useState } from "react";
 
-export default function () {
+export default function (track) {
   return (
     <div className="flex w-full flex-col">
       <a
@@ -11,15 +11,15 @@ export default function () {
       >
         <img
           className="h-14 w-14 rounded-t-lg object-cover"
-          src="https://cdn.discordapp.com/attachments/1202397182821408909/1202397277998551150/tom_stud.jpg?ex=65cd4eba&is=65bad9ba&hm=cabe5c046cf84d485f9a44131308ebe196374caa3c5478c6dafed46252e65417&"
+          src={track.track.album_image}
           alt="XYZ"
         />
         <div className="flex flex-col justify-between p-1 leading-normal">
           <p className="text-md pl-1 font-bold tracking-tight text-gray-900 dark:text-white">
-            Track Title
+            {track.track.track_name}
           </p>
           <p className="pl-1 font-normal text-gray-700 dark:text-gray-400">
-            Artist Name
+            {track.track.artist_names[0]}
           </p>
         </div>
       </a>

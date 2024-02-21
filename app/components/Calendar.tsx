@@ -19,11 +19,20 @@ export default function Calendar({ user }) {
 
   const { events, setEvents } = useCalendarStore();
   const { isEventSelected, setEventSelected } = useCalendarStore();
+  const { setTracksOnDate } = useCalendarStore();
   // const { tracks, setTracks } = useTrackStore();
   const tracks = useTrackStore((state) => state.tracks);
   const setTracks = useTrackStore((state) => state.setTracks);
 
   const dayClicked = (info) => {
+    const filteredByDay = new Map(
+      [...tracks].filter(([k, v]) => k === info.dateStr),
+    )
+      .values()
+      .next().value;
+
+    setTracksOnDate(filteredByDay);
+
     // If the user clicked on an Event, then we know events are in that day
     // So just set isEventSelected
     if (info?.event?.startStr) {
@@ -50,16 +59,15 @@ export default function Calendar({ user }) {
     queryKey: ["tracks"],
     queryFn: () => spotifyGetSavedTracks(user.spotify_access_token),
     notifyOnChangeProps: ["data", "status"],
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
     if (status == "success") {
       console.log(data);
-      setTracks(data);
-      // console.log(createCalendarEvents(data));
-      setEvents(createCalendarEvents(data));
-      // if you change (data) to (tracks) it breaks
+      let temp = createCalendarEvents(data);
+      setTracks(temp[0]);
+      setEvents(temp[1]);
     }
   }, [data]);
 

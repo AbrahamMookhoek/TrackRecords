@@ -212,22 +212,18 @@ export function createCalendarEvents(tracks) {
     }
   });
 
-  console.log(tracksByDay)
-
-  
-
   tracksByDay.forEach((tracksForDate, date) => {
-    // console.log(date);
     let currTrack = {
       title: tracksForDate.length + " Added",
       color: "green",
       start: date,
       id: "addedTrack",
     };
+
     events.push(currTrack);
   });
 
   console.log("Events Generated", events);
 
-  return events;
+  return [tracksByDay, events];
 }
