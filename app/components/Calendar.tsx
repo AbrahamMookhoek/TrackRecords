@@ -9,6 +9,8 @@ import { useCalendarStore } from "../store/calendarStore";
 import { useTrackStore } from "../store/trackStore";
 import { IconButton } from "@mui/material";
 import PowerOffIcon from "@mui/icons-material/PowerOff";
+import Snackbar  from "@mui/material/Snackbar";
+import CloseIcon from "@mui/icons-material/Close";
 // import { createEvents } from "../utils/trackParser";
 
 import { useQuery } from "@tanstack/react-query";
@@ -16,11 +18,19 @@ import { createCalendarEvents, spotifyGetSavedTracks } from "../utils/spotify";
 
 export default function Calendar({ user }) {
   const calendarRef = useRef(null);
+  const [open, setOpen] = useState(true)
+
+  const handleClose = (event: React.SyntheticEvent | Event, reason?: string) => {
+    if(reason === 'clickaway'){
+      return
+    }
+
+    setOpen(false)
+  }
 
   const { events, setEvents } = useCalendarStore();
   const { isEventSelected, setEventSelected } = useCalendarStore();
   const { setTracksOnDate } = useCalendarStore();
-  // const { tracks, setTracks } = useTrackStore();
   const tracks = useTrackStore((state) => state.tracks);
   const setTracks = useTrackStore((state) => state.setTracks);
 
@@ -71,6 +81,7 @@ export default function Calendar({ user }) {
 
   useEffect(() => {
     if (status == "success") {
+      // setOpen(false)
       console.log(data);
       let temp = createCalendarEvents(data);
       setTracks(temp[0]);
@@ -92,6 +103,24 @@ export default function Calendar({ user }) {
         dateClick={dayClicked}
         // eventDidMount={addIconToEvent}
       />
+      <Snackbar
+        open={open}
+        onClose={handleClose}
+        message={isLoading ? "Fetching your songs. Please wait.." : "Tracks Fetched."}
+        anchorOrigin={{vertical: "bottom", horizontal:"right"}}
+        action={
+          <React.Fragment>
+            <IconButton
+              aria-label="close"
+              color="inherit"
+              sx={{ p:0.5 }}
+              onClick={handleClose}
+              >
+                <CloseIcon/>
+              </IconButton>
+          </React.Fragment>
+        }
+        />
     </div>
   );
 }
