@@ -25,18 +25,17 @@ export default function Calendar({ user }) {
   const setTracks = useTrackStore((state) => state.setTracks);
 
   const dayClicked = (info) => {
-    const filteredByDay = new Map(
-      [...tracks].filter(([k, v]) => k === info.dateStr),
-    )
-      .values()
-      .next().value;
-
-    setTracksOnDate(filteredByDay);
-
     // If the user clicked on an Event, then we know events are in that day
     // So just set isEventSelected
     if (info?.event?.startStr) {
       setEventSelected(!isEventSelected);
+      const filteredByDay = new Map(
+        [...tracks].filter(([k, v]) => k === info.event.startStr),
+      )
+        .values()
+        .next().value;
+
+      setTracksOnDate(filteredByDay);
     }
     // This means the user clicked on a day
     else {
@@ -48,6 +47,14 @@ export default function Calendar({ user }) {
       // If they have, "select" that day
       if (filteredEvents.length > 0) {
         setEventSelected(!isEventSelected);
+
+        const filteredByDay = new Map(
+          [...tracks].filter(([k, v]) => k === info.dateStr),
+        )
+          .values()
+          .next().value;
+
+        setTracksOnDate(filteredByDay);
       } else {
         setEventSelected(false);
       }
