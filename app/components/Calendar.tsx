@@ -1,17 +1,14 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import ReactDOM from "react-dom";
 import FullCalendar from "@fullcalendar/react";
 import interactionPlugin from "@fullcalendar/interaction";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import { useCalendarStore } from "../store/calendarStore";
 import { useTrackStore } from "../store/trackStore";
 import { IconButton } from "@mui/material";
-import PowerOffIcon from "@mui/icons-material/PowerOff";
 import Snackbar  from "@mui/material/Snackbar";
 import CloseIcon from "@mui/icons-material/Close";
-// import { createEvents } from "../utils/trackParser";
 
 import { useQuery } from "@tanstack/react-query";
 import { createCalendarEvents, spotifyGetSavedTracks } from "../utils/spotify";

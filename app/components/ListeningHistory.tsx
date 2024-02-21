@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect } from "react";
 import { Button } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
 import TrackCard from "./TrackCard";
 import { useCalendarStore } from "../store/calendarStore";
 

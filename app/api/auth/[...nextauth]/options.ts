@@ -74,18 +74,3 @@ export const options: NextAuthOptions = {
         strategy: "jwt"
     }
 }
-
-export async function loginIsRequiredServer() {
-    const session = await getServerSession(options);
-    if (!session){
-        return redirect("/");
-    }
-}
-
-export function loginIsRequiredClient() {
-    if (typeof window !== "undefined") {
-        const session = useSession();
-        const router = useRouter();
-        if (!session) router.push("/");
-    }
-}
