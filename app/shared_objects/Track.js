@@ -1,7 +1,8 @@
 export class Track {
-    constructor(spotify_id, added_at, album_image, album_name, artist_names, artist_url, track_duration, track_link, track_name) {
-        this.spotify_id = spotify_id;
+    constructor(spotify_uri, added_at, played_at, album_image, album_name, artist_names, artist_url, track_duration, track_link, track_name) {
+        this.spotify_uri = spotify_uri;
         this.added_at = added_at;
+        this.played_at = played_at;
         this.album_image = album_image;
         this.album_name = album_name;
         this.artist_names = artist_names;
@@ -12,4 +13,4 @@ export class Track {
     }
 }
 
-let track = new Track(null, null, null, null, null, null, null, null);
+let track = new Track(null, null, null, null, null, null, null, null, null);

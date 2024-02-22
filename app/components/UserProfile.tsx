@@ -13,7 +13,7 @@ import Settings from "@mui/icons-material/Settings";
 import Logout from "@mui/icons-material/Logout";
 import { signOut } from "next-auth/react";
 
-export default function UserProfile() {
+export default function UserProfile({ user }) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -25,6 +25,7 @@ export default function UserProfile() {
   return (
     <>
       <Box sx={{ display: "flex", alignItems: "center", textAlign: "center" }}>
+        <p><b>Hello, {user.name}</b></p>
         <Tooltip title="Account settings">
           <IconButton
             onClick={handleClick}
@@ -34,7 +35,7 @@ export default function UserProfile() {
             aria-haspopup="true"
             aria-expanded={open ? "true" : undefined}
           >
-            <Avatar src="https://cdn.discordapp.com/attachments/1202397182821408909/1202397277998551150/tom_stud.jpg?ex=65cd4eba&is=65bad9ba&hm=cabe5c046cf84d485f9a44131308ebe196374caa3c5478c6dafed46252e65417&"></Avatar>
+            <Avatar src={user.image ? user.image : ""}></Avatar>
           </IconButton>
         </Tooltip>
       </Box>
@@ -74,7 +75,7 @@ export default function UserProfile() {
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
         <MenuItem onClick={handleClose}>
-          <Avatar /> My account
+          <Avatar src={user.image ? user.image : ""}/> My account
         </MenuItem>
         <Divider />
         <MenuItem onClick={handleClose}>

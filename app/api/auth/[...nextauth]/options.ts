@@ -9,6 +9,7 @@ import { useSession } from 'next-auth/react'
 import { getServerSession } from 'next-auth'
 
 import refreshAccessToken from '@/app/utils/spotify'
+import { spotifyGetSavedTracks } from '@/app/utils/spotify'
 
 async function refreshToken(token){
     let returnedObj = await refreshAccessToken(token.spotify_refresh_token)
@@ -34,7 +35,7 @@ export const options: NextAuthOptions = {
         SpotifyProvider({
             clientId: process.env.SPOTIFY_CLIENT_ID,
             clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-            authorization: `https://accounts.spotify.com/authorize?scope=ugc-image-upload,user-read-private,user-read-email,user-library-read`,
+            authorization: `https://accounts.spotify.com/authorize?scope=ugc-image-upload,user-read-private,user-read-email,user-library-read,user-read-recently-played`,
         }),
     ],
     callbacks: {
@@ -44,6 +45,10 @@ export const options: NextAuthOptions = {
                 token.spotify_access_token = account.access_token
                 token.spotify_refresh_token = account.refresh_token
                 token.access_token_expires = account.expires_at * 1000
+                user.new_session = true
+
+                console.log("Gathering user spotify songs right now")
+                spotifyGetSavedTracks(token.spotify_access_token, user.name)
 
                 return token
             }
@@ -67,20 +72,5 @@ export const options: NextAuthOptions = {
     },
     session: {
         strategy: "jwt"
-    }
-}
-
-export async function loginIsRequiredServer() {
-    const session = await getServerSession(options);
-    if (!session){
-        return redirect("/");
-    }
-}
-
-export function loginIsRequiredClient() {
-    if (typeof window !== "undefined") {
-        const session = useSession();
-        const router = useRouter();
-        if (!session) router.push("/");
     }
 }

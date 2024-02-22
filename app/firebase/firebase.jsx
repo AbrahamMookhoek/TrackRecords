@@ -1,12 +1,12 @@
 import { db } from "@/app/firebase/config"
 import { Track } from "../shared_objects/Track";
-import { collection, doc, setDoc, getDoc, getDocs, query, where } from "firebase/firestore";
-import { firestore } from "firebase-admin";
+import { collection, doc, setDoc, getDocs, query, where } from "firebase/firestore";
 
 export async function writeTracksToFirestore(user_name, tracks)
-{    
-    const q = query(collection(db, "users"), where("name", "==", user_name));
-    const userSnap = await getDocs(q)
+  { 
+    const queryForUser = query(collection(db, "users"), where("name", "==", user_name));
+
+    const userSnap = await getDocs(queryForUser)
     var count = 0;
     
     for (const index in tracks) {
@@ -34,6 +34,7 @@ export async function writeTracksToFirestore(user_name, tracks)
 
 export async function readTracksFromFirestore(user_name)
 {
+    console.log("RETREIVING INFO")
     var tracks = []
 
     const q = query(collection(db, "users"), where("name", "==", user_name));
@@ -89,4 +90,21 @@ export async function readMonthTracksFromFirestore(user_name, month) {
   console.log("saved:", tracks.length);
 
   return tracks;
+}
+
+export async function updateTracks(spotifyTotalTracks, username)
+{
+  const queryForUser = query(collection(db, "users"), where("name", "==", username));
+  const userSnap = await getDocs(queryForUser)
+
+  const queryForExistingTracks = query(collection(db, "users", userSnap.docs[0].id, "tracks"))
+  const queryForExistingTracksSnap = await getDocs(queryForExistingTracks)
+
+  if(spotifyTotalTracks == queryForExistingTracksSnap.size)
+  {
+    console.log("No need to write to Firestore, user's library has not changed")
+    return false; 
+  }
+
+  return true;
 }
