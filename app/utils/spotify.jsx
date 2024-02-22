@@ -192,6 +192,115 @@ export async function spotifyGetSavedTracks(access_token, user_name) {
   return tracks;
 }
 
+export async function spotifygetRecentlyListened() {
+  var myHeaders = new Headers();
+  myHeaders.append("Authorization", "Bearer " + access_token);
+
+  var requestOptions = {
+    method: "GET",
+    headers: myHeaders,
+    redirect: "follow",
+  };
+
+  var tracks = [];
+  var artistsNameArray = [];
+  var artistsLinkArray = [];
+  var nextSongBatchLink = "";
+  // below 2 variables are purely for debugging
+  var count = 0;
+  var count_iter = 0;
+
+  await fetch("https://api.spotify.com/v1/me/player/recently-played?limit=50", requestOptions)
+    .then((response) => response.json())
+    .then((result) => {
+      // nextSongBatchLink = result.next;
+      count += result.items.length;
+
+      result.items.forEach((item) => {
+        artistsNameArray = [];
+        artistsLinkArray = [];
+
+        if (item != undefined) {
+          item.track.artists.forEach((artist) => {
+            artistsNameArray.push(artist.name);
+            artistsLinkArray.push(artist.external_urls.spotify);
+          });
+
+          tracks.push(
+            new Track(
+              item.track.uri,
+              [],
+              [item.played_at],
+              item.track.album.images.length !== 0 ? item.track.album.images[item.track.album.images.length - 1].url  : "Unknown",
+              item.track.album.name,
+              artistsNameArray,
+              artistsLinkArray,
+              item.track.duration_ms,
+              item.track.external_urls.spotify,
+              item.track.name,
+            ),
+          );
+
+          count_iter += 1;
+        }
+      });
+    })
+    .catch((error) => console.log("error", error));
+  // console.log("total songs:", count);
+  // console.log("saved songs:", count_iter);
+  // console.log(nextSongBatchLink)
+  // console.log("\n")
+
+  while (nextSongBatchLink != null) {
+    await fetch(nextSongBatchLink, requestOptions)
+      .then((response) => response.json())
+      .then((result) => {
+        nextSongBatchLink = result.next;
+        count += result.items.length;
+
+        result.items.forEach((item) => {
+          artistsNameArray = [];
+          artistsLinkArray = [];
+
+          if (item != undefined) {
+            item.track.artists.forEach((artist) => {
+              artistsNameArray.push(artist.name);
+              artistsLinkArray.push(artist.external_urls.spotify);
+            });
+
+            var date_added = item.added_at;
+            date_added = date_added.split("T")[0];
+
+            tracks.push(
+              new Track(
+                item.track.uri,
+                [],
+                [item.played_at],
+                item.track.album.images.length !== 0 ? item.track.album.images[item.track.album.images.length - 1].url : "Unknown",
+                item.track.album.name,
+                artistsNameArray,
+                artistsLinkArray,
+                item.track.duration_ms,
+                item.track.external_urls.spotify,
+                item.track.name,
+              ),
+            );
+
+            count_iter += 1;
+          }
+        });
+      })
+      .catch((error) => console.log("error", error));
+    // console.log("total songs:",count)
+    console.log("saved songs:", count_iter);
+    console.log("array lengt:", tracks.length);
+    // console.log(nextSongBatchLink)
+    // console.log("\n")
+  }
+
+  //await writeTracksToFirestore(user_name, tracks);
+}
+
 export function createCalendarEvents(tracks) {
   if (tracks === undefined) {
     return [];
