@@ -4,7 +4,8 @@ export default function (track) {
   return (
     <div className="flex w-full flex-col">
       <a
-        href="#"
+        href={track.track.track_link}
+        target="_blank"
         className="flex flex-col items-center rounded-lg border border-gray-200 bg-white shadow hover:bg-gray-100 md:max-w-xl md:flex-row dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700"
       >
         <img

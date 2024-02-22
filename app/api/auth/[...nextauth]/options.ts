@@ -35,7 +35,7 @@ export const options: NextAuthOptions = {
         SpotifyProvider({
             clientId: process.env.SPOTIFY_CLIENT_ID,
             clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-            authorization: `https://accounts.spotify.com/authorize?scope=ugc-image-upload,user-read-private,user-read-email,user-library-read`,
+            authorization: `https://accounts.spotify.com/authorize?scope=ugc-image-upload,user-read-private,user-read-email,user-library-read,user-read-recently-played`,
         }),
     ],
     callbacks: {

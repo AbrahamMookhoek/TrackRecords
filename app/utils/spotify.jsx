@@ -30,7 +30,7 @@ export default async function refreshAccessToken(refresh_token) {
   return info;
 }
 
-async function testSpotify(access_token) {
+export async function spotifyGetSavedTracks(access_token) {
   var myHeaders = new Headers();
   myHeaders.append("Authorization", "Bearer " + access_token);
 
@@ -40,80 +40,42 @@ async function testSpotify(access_token) {
     redirect: "follow",
   };
 
-  fetch("https://api.spotify.com/v1/me", requestOptions)
-    .then((response) => response.text())
-    .then((result) => console.log(result))
-    .catch((error) => console.log("error", error));
-}
-
-async function testRefreshToken(refresh_token) {
-  var refresh_token = refresh_token;
-  var authOptions = {
-    method: "POST",
-    headers: {
-      "content-type": "application/x-www-form-urlencoded",
-      Authorization:
-        "Basic " +
-        new Buffer.from(
-          process.env.SPOTIFY_CLIENT_ID +
-            ":" +
-            process.env.SPOTIFY_CLIENT_SECRET,
-        ).toString("base64"),
-    },
-    body: `grant_type=refresh_token&refresh_token=${refresh_token}`,
-    cache: "no-cache",
-    json: true,
-  };
-
-  const res = await fetch(
-    "https://accounts.spotify.com/api/token",
-    authOptions,
-  );
-  console.log(await res.json());
-}
-
-export async function spotifyGetSavedTracks(access_token, user_name) {
-  var myHeaders = new Headers();
-  myHeaders.append("Authorization", "Bearer " + access_token);
-
-  var requestOptions = {
-    method: "GET",
-    headers: myHeaders,
-    redirect: "follow",
-  };
-
-  var tracks = [];
+  var tracks_added = [];
+  var tracks_played = [];
   var artistsNameArray = [];
   var artistsLinkArray = [];
   var nextSongBatchLink = "";
-  var total = 0;
   // below 2 variables are purely for debugging
   var count = 0;
   var count_iter = 0;
 
+  // get all tracks in saved library
   await fetch("https://api.spotify.com/v1/me/tracks?limit=50", requestOptions)
     .then((response) => {
-      return response.json();
+      return response.json()
     })
     .then((result) => {
-      total = result.total;
       nextSongBatchLink = result.next;
       count += result.items.length;
 
-      artistsNameArray = [];
-      artistsLinkArray = [];
-
       result.items.forEach((item) => {
+        artistsNameArray = [];
+        artistsLinkArray = [];
+
         if (item != undefined) {
           item.track.artists.forEach((artist) => {
             artistsNameArray.push(artist.name);
             artistsLinkArray.push(artist.external_urls.spotify);
           });
 
-          tracks.push(
+          var date_added = item.added_at;
+          date_added = date_added.split("T")[0];
+
+          tracks_added.push(
             new Track(
-              item.track.id,
-              item.added_at,
+              item.track.uri,
+              date_added + "|Saved Songs",
+              [],
               item.track.album.images.length !== 0
                 ? item.track.album.images[item.track.album.images.length - 1]
                     .url
@@ -133,14 +95,6 @@ export async function spotifyGetSavedTracks(access_token, user_name) {
     })
     .catch((error) => console.log("error", error));
 
-  // var needToCheck = await updateTracks(total, user_name)
-
-  // if(!needToCheck)
-  // {
-  //   console.log("Canceling further Spotify calls, no update required")
-  //   return;
-  // }
-
   while (nextSongBatchLink != null) {
     await fetch(nextSongBatchLink, requestOptions)
       .then((response) => response.json())
@@ -158,10 +112,14 @@ export async function spotifyGetSavedTracks(access_token, user_name) {
               artistsLinkArray.push(artist.external_urls.spotify);
             });
 
-            tracks.push(
+            var date_added = item.added_at;
+            date_added = date_added.split("T")[0];
+
+            tracks_added.push(
               new Track(
-                item.track.id,
-                item.added_at,
+                item.track.uri,
+                date_added + "|Saved Songs",
+                [],
                 item.track.album.images.length !== 0
                   ? item.track.album.images[item.track.album.images.length - 1]
                       .url
@@ -182,35 +140,24 @@ export async function spotifyGetSavedTracks(access_token, user_name) {
       .catch((error) => console.log("error", error));
     // console.log("total songs:",count)
     console.log("saved songs:", count_iter);
-    console.log("array length:", tracks.length);
+    console.log("array lengt:", tracks_added.length);
     // console.log(nextSongBatchLink)
     // console.log("\n")
   }
 
+  console.log(tracks_played);
+
   // await writeTracksToFirestore(user_name, tracks);
 
-  return tracks;
+  return tracks_added;
 }
 
-export async function spotifygetRecentlyListened() {
-  var myHeaders = new Headers();
-  myHeaders.append("Authorization", "Bearer " + access_token);
-
-  var requestOptions = {
-    method: "GET",
-    headers: myHeaders,
-    redirect: "follow",
-  };
-
-  var tracks = [];
-  var artistsNameArray = [];
-  var artistsLinkArray = [];
-  var nextSongBatchLink = "";
-  // below 2 variables are purely for debugging
-  var count = 0;
-  var count_iter = 0;
-
-  await fetch("https://api.spotify.com/v1/me/player/recently-played?limit=50", requestOptions)
+export async function getRecentlyPlayed(access_token){
+   // get recently listened to
+   await fetch(
+    "https://api.spotify.com/v1/me/player/recently-played?limit=50",
+    requestOptions,
+  )
     .then((response) => response.json())
     .then((result) => {
       // nextSongBatchLink = result.next;
@@ -226,12 +173,15 @@ export async function spotifygetRecentlyListened() {
             artistsLinkArray.push(artist.external_urls.spotify);
           });
 
-          tracks.push(
+          tracks_played.push(
             new Track(
               item.track.uri,
               [],
               [item.played_at],
-              item.track.album.images.length !== 0 ? item.track.album.images[item.track.album.images.length - 1].url  : "Unknown",
+              item.track.album.images.length !== 0
+                ? item.track.album.images[item.track.album.images.length - 1]
+                    .url
+                : "Unknown",
               item.track.album.name,
               artistsNameArray,
               artistsLinkArray,
@@ -271,12 +221,15 @@ export async function spotifygetRecentlyListened() {
             var date_added = item.added_at;
             date_added = date_added.split("T")[0];
 
-            tracks.push(
+            tracks_played.push(
               new Track(
                 item.track.uri,
                 [],
                 [item.played_at],
-                item.track.album.images.length !== 0 ? item.track.album.images[item.track.album.images.length - 1].url : "Unknown",
+                item.track.album.images.length !== 0
+                  ? item.track.album.images[item.track.album.images.length - 1]
+                      .url
+                  : "Unknown",
                 item.track.album.name,
                 artistsNameArray,
                 artistsLinkArray,
@@ -293,12 +246,10 @@ export async function spotifygetRecentlyListened() {
       .catch((error) => console.log("error", error));
     // console.log("total songs:",count)
     console.log("saved songs:", count_iter);
-    console.log("array lengt:", tracks.length);
+    console.log("array length:", tracks.length);
     // console.log(nextSongBatchLink)
     // console.log("\n")
   }
-
-  //await writeTracksToFirestore(user_name, tracks);
 }
 
 export function createCalendarEvents(tracks) {
