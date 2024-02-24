@@ -35,7 +35,7 @@ export const options: NextAuthOptions = {
         SpotifyProvider({
             clientId: process.env.SPOTIFY_CLIENT_ID,
             clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-            authorization: `https://accounts.spotify.com/authorize?scope=ugc-image-upload,user-read-private,user-read-email,user-library-read,user-read-recently-played`,
+            authorization: `https://accounts.spotify.com/authorize?scope=ugc-image-upload,user-read-private,user-read-email,user-library-read,user-read-recently-played,playlist-read-private`,
         }),
     ],
     callbacks: {
@@ -48,7 +48,7 @@ export const options: NextAuthOptions = {
                 user.new_session = true
 
                 console.log("Gathering user spotify songs right now")
-                spotifyGetSavedTracks(token.spotify_access_token, user.name)
+                // spotifyGetSavedTracks(token.spotify_access_token, user.name)
 
                 return token
             }

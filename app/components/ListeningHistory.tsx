@@ -13,7 +13,7 @@ export default function () {
   const { tracksOnDate } = useCalendarStore();
 
   useEffect(() => {
-    console.log(tracksOnDate);
+    // console.log(tracksOnDate);
   }, [tracksOnDate]);
 
   return (

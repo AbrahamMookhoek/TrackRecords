@@ -22,11 +22,6 @@ export default async function RootLayout({
 }) {
   const session = await getServerSession(options);
 
-  if (session) {
-    // console.log("Printed in root level layout " + session.user.email)
-    // console.log("Printed in root level layout " + session.user.spotify_access_token)
-  }
-
   return (
     <html lang="en">
       <body className={inter.className}>

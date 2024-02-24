@@ -1,4 +1,5 @@
 import { Track } from "../shared_objects/Track";
+import { Playlist } from "../shared_objects/Playlist";
 import { writeTracksToFirestore, updateTracks } from "@/app/firebase/firebase";
 import { useTrackStore } from "../store/trackStore";
 
@@ -30,7 +31,7 @@ export default async function refreshAccessToken(refresh_token) {
   return info;
 }
 
-export async function spotifyGetSavedTracks(access_token) {
+export async function spotifyGetSavedTracks(access_token, user_name) {
   var myHeaders = new Headers();
   myHeaders.append("Authorization", "Bearer " + access_token);
 
@@ -52,7 +53,7 @@ export async function spotifyGetSavedTracks(access_token) {
   // get all tracks in saved library
   await fetch("https://api.spotify.com/v1/me/tracks?limit=50", requestOptions)
     .then((response) => {
-      return response.json()
+      return response.json();
     })
     .then((result) => {
       nextSongBatchLink = result.next;
@@ -152,15 +153,24 @@ export async function spotifyGetSavedTracks(access_token) {
   return tracks_added;
 }
 
-export async function getRecentlyPlayed(access_token){
-   // get recently listened to
-   await fetch(
+export async function getRecentlyPlayed(access_token) {
+  var myHeaders = new Headers();
+  myHeaders.append("Authorization", "Bearer " + access_token);
+
+  var requestOptions = {
+    method: "GET",
+    headers: myHeaders,
+    redirect: "follow",
+  };
+
+  // get recently listened to
+  await fetch(
     "https://api.spotify.com/v1/me/player/recently-played?limit=50",
     requestOptions,
   )
     .then((response) => response.json())
     .then((result) => {
-      // nextSongBatchLink = result.next;
+      nextSongBatchLink = result.next;
       count += result.items.length;
 
       result.items.forEach((item) => {
@@ -196,10 +206,6 @@ export async function getRecentlyPlayed(access_token){
       });
     })
     .catch((error) => console.log("error", error));
-  // console.log("total songs:", count);
-  // console.log("saved songs:", count_iter);
-  // console.log(nextSongBatchLink)
-  // console.log("\n")
 
   while (nextSongBatchLink != null) {
     await fetch(nextSongBatchLink, requestOptions)
@@ -247,9 +253,144 @@ export async function getRecentlyPlayed(access_token){
     // console.log("total songs:",count)
     console.log("saved songs:", count_iter);
     console.log("array length:", tracks.length);
-    // console.log(nextSongBatchLink)
-    // console.log("\n")
   }
+}
+
+export async function getPlaylists(access_token, username) {
+  var myHeaders = new Headers();
+  myHeaders.append("Authorization", "Bearer " + access_token);
+
+  var requestOptions = {
+    method: "GET",
+    headers: myHeaders,
+    redirect: "follow",
+  };
+
+  var playlists = [];
+
+  await fetch(
+    "https://api.spotify.com/v1/me/playlists?limit=50",
+    requestOptions,
+  )
+    .then((res) => {
+      return res.json();
+    })
+    .then((data) => {
+      data.items.forEach((item) => {
+        if (username === item.owner.display_name) {
+          console.log(item.name + ": " + item.tracks.total);
+
+          playlists.push(
+            new Playlist(
+              item.id,
+              item.name,
+              item.tracks.href,
+              item.images[0].url,
+              item.description,
+              item.uri,
+            ),
+          );
+        }
+      });
+    });
+
+  async function fetchData(playlist, url, requestOptions) {
+    var tracks_from_playlist = [];
+    await fetch(url, requestOptions)
+      .then((response) => response.json())
+      .then(async (data) => {
+        // iterate through each next url
+        data.items.forEach((item) => {
+          let artistsNameArray = [];
+          let artistsLinkArray = [];
+
+          if (item != undefined) {
+            item.track.artists.forEach((artist) => {
+              artistsNameArray.push(artist.name);
+              artistsLinkArray.push(artist.external_urls.spotify);
+            });
+          }
+
+          tracks_from_playlist.push(
+            new Track(
+              item.track.uri,
+              item.added_at,
+              [],
+              item.track.album.images.length !== 0
+                ? item.track.album.images[item.track.album.images.length - 1]
+                    .url
+                : "Unknown",
+              item.track.album.name,
+              artistsNameArray,
+              artistsLinkArray,
+              item.track.duration_ms,
+              item.track.external_urls.spotify,
+              item.track.name,
+            ),
+          );
+        });
+
+        tracks_from_playlist = tracks_from_playlist.concat(
+          await callNextPage(data.next, requestOptions),
+        );
+      })
+      .catch((error) => console.error("Error fetching data:", error));
+
+    playlist.tracks = tracks_from_playlist;
+    return;
+  }
+
+  async function callNextPage(url, requestOptions) {
+    var tracks_from_playlist = [];
+
+    while (url != undefined) {
+      await fetch(url, requestOptions)
+        .then((response) => response.json())
+        .then((data) => {
+          data.items.forEach((item) => {
+            let artistsNameArray = [];
+            let artistsLinkArray = [];
+
+            if (item != undefined) {
+              item.track.artists.forEach((artist) => {
+                artistsNameArray.push(artist.name);
+                artistsLinkArray.push(artist.external_urls.spotify);
+              });
+            }
+
+            tracks_from_playlist.push(
+              new Track(
+                item.track.uri,
+                item.track.added_at,
+                [],
+                item.track.album.images.length !== 0
+                  ? item.track.album.images[item.track.album.images.length - 1]
+                      .url
+                  : "Unknown",
+                item.track.album.name,
+                artistsNameArray,
+                artistsLinkArray,
+                item.track.duration_ms,
+                item.track.external_urls.spotify,
+                item.track.name,
+              ),
+            );
+          });
+
+          url = data.next;
+        })
+        .catch((error) => console.error("Error fetching data:", error));
+    }
+
+    return tracks_from_playlist;
+  }
+
+  // Iterate through the array and make fetch calls using forEach
+  playlists.forEach((playlist) => {
+    fetchData(playlist, playlist.tracks, requestOptions);
+  });
+
+  return playlists;
 }
 
 export function createCalendarEvents(tracks) {
