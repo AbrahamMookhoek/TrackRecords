@@ -72,7 +72,6 @@ export async function spotifyGetSavedTracks(access_token) {
             new Track(
               item.track.uri.split(":").pop(),
               item.added_at.split("T")[0],
-              [],
               item.track.album.images.length !== 0
                 ? item.track.album.images[item.track.album.images.length - 1]
                     .url
@@ -83,7 +82,7 @@ export async function spotifyGetSavedTracks(access_token) {
               item.track.duration_ms,
               item.track.external_urls.spotify,
               item.track.name,
-              ["User-Library"],
+              [],
             ),
           );
 
@@ -114,7 +113,6 @@ export async function spotifyGetSavedTracks(access_token) {
               new Track(
                 item.track.uri.split(":").pop(),
                 item.added_at.split("T")[0],
-                [],
                 item.track.album.images.length !== 0
                   ? item.track.album.images[item.track.album.images.length - 1]
                       .url
@@ -125,6 +123,7 @@ export async function spotifyGetSavedTracks(access_token) {
                 item.track.duration_ms,
                 item.track.external_urls.spotify,
                 item.track.name,
+                []
               ),
             );
 
@@ -295,17 +294,24 @@ export async function makePaginatedRequest(url, access_token) {
 
 async function getAllPlaylistsAndTracks(access_token, username) {
   try {
-    var tracksToReturn = []
+    var tracksToReturn = [];
     const playlists = await getAllPlaylists(access_token, username);
+    
     for (const playlist of playlists) {
       if (playlist.owner.display_name === username) {
-        const tracks = await getAllPlaylistTracks(access_token, playlist.id);
-        tracksToReturn.push(tracks)
-        console.log(`Tracks in playlist ${playlist.name}:`, tracks);
+        const playlistTracks = await getAllPlaylistTracks(access_token, playlist.id);
+        const tracksWithPlaylistInfo = playlistTracks.map(track => ({
+          ...track,
+          playlistName: playlist.name,
+          playlistId: playlist.id,
+          playlistUrl: playlist.external_urls.spotify
+        }));
+        tracksToReturn.push(...tracksWithPlaylistInfo);
+        console.log(`Tracks in playlist ${playlist.name}:`, playlistTracks);
       }
     }
 
-    return tracksToReturn
+    return tracksToReturn;
   } catch (error) {
     console.error("Error", error);
   }
@@ -315,14 +321,15 @@ export async function generateMasterSongList(access_token, username) {
   var songs = await spotifyGetSavedTracks(access_token);
   var tracksFromPlaylists = await getAllPlaylistsAndTracks(access_token, username)
 
-  // tracksFromPlaylists.forEach((playlist) => {
-  //   playlist.forEach((playlistItem) => {
-  //     if(!songs.has(playlistItem.track.uri.split(":").pop()))
-  //     {
-  //       console.log(playlistItem.track.name, playlistItem.track.uri)
-  //     }
-  //   })
-  // })
+  tracksFromPlaylists.forEach((playlistItem) => {
+    let key = playlistItem.track.uri.split(":").pop()
+
+    if(songs.has(key))
+    {
+      let trackObj = songs.get(key)
+      trackObj.playlists_added_to.push({name: playlistItem.playlistName, playlist_link: playlistItem.playlistUrl, added_at: playlistItem.added_at.split("T")[0]})
+    }
+  })
 
   return [songs, tracksFromPlaylists];
 }
