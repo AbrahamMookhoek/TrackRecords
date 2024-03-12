@@ -19,6 +19,7 @@ const processSpotifyHistoryFromZip = (zipFilePath) => {
       const isInMyDataFolder = fileName.startsWith('MyData/');
 
       if (fileType === 'File' && isJsonFile && isInMyDataFolder) {
+
         entry.buffer().then(function (content) {
           const tracksData = JSON.parse(content.toString());
 

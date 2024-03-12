@@ -12,8 +12,11 @@ import Tooltip from "@mui/material/Tooltip";
 import Settings from "@mui/icons-material/Settings";
 import Logout from "@mui/icons-material/Logout";
 import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function UserProfile({ user }) {
+  const router = useRouter();
+
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -22,6 +25,11 @@ export default function UserProfile({ user }) {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  const handleSettings = () => {
+    router.push("/dashboard/settings")
+  }
+
   return (
     <>
       <Box sx={{ display: "flex", alignItems: "center", textAlign: "center" }}>
@@ -78,7 +86,7 @@ export default function UserProfile({ user }) {
           <Avatar src={user.image ? user.image : ""}/> My account
         </MenuItem>
         <Divider />
-        <MenuItem onClick={handleClose}>
+        <MenuItem onClick={handleSettings}>
           <ListItemIcon>
             <Settings fontSize="small" />
           </ListItemIcon>
