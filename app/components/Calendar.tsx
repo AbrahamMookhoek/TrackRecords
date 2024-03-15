@@ -11,7 +11,8 @@ import Snackbar  from "@mui/material/Snackbar";
 import CloseIcon from "@mui/icons-material/Close";
 
 import { useQuery } from "@tanstack/react-query";
-import { createCalendarEvents, spotifyGetSavedTracks } from "../utils/spotify";
+import { createCalendarEvents, generateMasterSongList } from "../utils/spotify";
+import { useQueries } from "react-query";
 
 export default function Calendar({ user }) {
   const calendarRef = useRef(null);
@@ -21,7 +22,6 @@ export default function Calendar({ user }) {
     if(reason === 'clickaway'){
       return
     }
-
     setOpen(false)
   }
 
@@ -71,7 +71,7 @@ export default function Calendar({ user }) {
   // code to fetch data
   const { status, data, error, isLoading } = useQuery({
     queryKey: ["tracks"],
-    queryFn: () => spotifyGetSavedTracks(user.spotify_access_token),
+    queryFn: () => generateMasterSongList(user.spotify_access_token, user.name),
     notifyOnChangeProps: ["data", "status"],
     refetchOnWindowFocus: false,
   });
