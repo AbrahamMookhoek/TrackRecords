@@ -4,14 +4,14 @@ import React, { useEffect, useRef, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import interactionPlugin from "@fullcalendar/interaction";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import { useCalendarStore } from "../../store/calendarStore";
-import { useTrackStore } from "../../store/trackStore";
+import { useCalendarStore } from "../store/calendarStore";
+import { useTrackStore } from "../store/trackStore";
 import { IconButton } from "@mui/material";
 import Snackbar  from "@mui/material/Snackbar";
 import CloseIcon from "@mui/icons-material/Close";
 
 import { useQuery } from "@tanstack/react-query";
-import { createCalendarEvents, generateMasterSongList } from "../../utils/spotify";
+import { createCalendarEvents, generateMasterSongList } from "../utils/spotify";
 import { useQueries } from "react-query";
 
 export default function Calendar({ user }) {
@@ -80,9 +80,9 @@ export default function Calendar({ user }) {
     if (status == "success") {
       // setOpen(false)
       console.log(data);
-      // let temp = createCalendarEvents(data);
-      // setTracks(temp[0]);
-      // setEvents(temp[1]);
+      let temp = createCalendarEvents(data);
+      setTracks(temp[0]);
+      setEvents(temp[1]);
     }
   }, [data]);
 
