@@ -80,9 +80,9 @@ export default function Calendar({ user }) {
     if (status == "success") {
       // setOpen(false)
       console.log(data);
-      // let temp = createCalendarEvents(data);
-      // setTracks(temp[0]);
-      // setEvents(temp[1]);
+      let temp = createCalendarEvents(data);
+      setTracks(temp[0]);
+      setEvents(temp[1]);
     }
   }, [data]);
 
