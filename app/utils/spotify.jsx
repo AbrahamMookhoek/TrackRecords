@@ -1,7 +1,4 @@
 import { Track } from "../shared_objects/Track";
-import { Playlist } from "../shared_objects/Playlist";
-import { writeTracksToFirestore, updateTracks } from "@/app/firebase/firebase";
-import { useTrackStore } from "../store/trackStore";
 
 export default async function refreshAccessToken(refresh_token) {
   var refresh_token = refresh_token;
@@ -321,17 +318,57 @@ export async function generateMasterSongList(access_token, username) {
   var songs = await spotifyGetSavedTracks(access_token);
   var tracksFromPlaylists = await getAllPlaylistsAndTracks(access_token, username)
 
-  tracksFromPlaylists.forEach((playlistItem) => {
-    let key = playlistItem.track.uri.split(":").pop()
+  try{
+  var formattedTracksFromPlaylists = tracksFromPlaylists.map((playlistItem) => {
+    let artistsNameArray = [];
+    let artistsLinkArray = [];
+
+    if (playlistItem != undefined) {
+      playlistItem.track.artists.forEach((artist) => {
+        artistsNameArray.push(artist.name);
+        artistsLinkArray.push(artist.external_urls.spotify);
+      });
+    }
+
+    let trackObj = new Track(
+      playlistItem.track.uri.split(":").pop(),
+      undefined,
+      playlistItem.track.album.images.length !== 0 ? playlistItem.track.album.images[playlistItem.track.album.images.length - 1].url : "Unknown",
+      playlistItem.track.album.name,
+      artistsNameArray,
+      artistsLinkArray,
+      playlistItem.track.duration_ms,
+      playlistItem.track.external_urls.spotify,
+      playlistItem.track.name,
+      [{name: playlistItem.playlistName, playlist_link: playlistItem.playlistUrl, added_at: playlistItem.added_at.split("T")[0]}],
+    )
+
+    playlistItem.track = trackObj
+
+    return playlistItem
+  })
+} catch (error){
+  console.log(error)
+}
+
+try{
+  formattedTracksFromPlaylists.forEach((playlistItem) => {
+    let key = playlistItem.track.spotify_uri.split(":").pop()
 
     if(songs.has(key))
     {
       let trackObj = songs.get(key)
       trackObj.playlists_added_to.push({name: playlistItem.playlistName, playlist_link: playlistItem.playlistUrl, added_at: playlistItem.added_at.split("T")[0]})
     }
+    else{
+      songs.set(key, playlistItem.track)
+    }
   })
+} catch (error){
+  console.log(error)
+}
 
-  return [songs, tracksFromPlaylists];
+  return songs;
 }
 
 export function createCalendarEvents(tracks) {
@@ -342,15 +379,18 @@ export function createCalendarEvents(tracks) {
 
   const tracksByDay = new Map();
   tracks.forEach((track) => {
-    // Extract the date part from the timestamp
-    const dateKey = track.added_at.substring(0, 10);
+    // currently doesnt check for playlist songs
+    if(track.added_at){
+      // Extract the date part from the timestamp
+      const dateKey = track.added_at.substring(0, 10);
 
-    if (tracksByDay.has(dateKey)) {
-      // If the date key exists, add the track to the existing array
-      tracksByDay.get(dateKey).push(track);
-    } else {
-      // If the date key doesn't exist, create a new array with the track
-      tracksByDay.set(dateKey, [track]);
+      if (tracksByDay.has(dateKey)) {
+        // If the date key exists, add the track to the existing array
+        tracksByDay.get(dateKey).push(track);
+      } else {
+        // If the date key doesn't exist, create a new array with the track
+        tracksByDay.set(dateKey, [track]);
+      }
     }
   });
 
@@ -366,6 +406,7 @@ export function createCalendarEvents(tracks) {
   });
 
   console.log("Events Generated", events);
+  console.log(tracksByDay)
 
   return [tracksByDay, events];
 }
