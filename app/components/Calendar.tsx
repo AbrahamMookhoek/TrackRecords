@@ -7,7 +7,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import { useCalendarStore } from "../store/calendarStore";
 import { useTrackStore } from "../store/trackStore";
 import { IconButton } from "@mui/material";
-import Snackbar  from "@mui/material/Snackbar";
+import Snackbar from "@mui/material/Snackbar";
 import CloseIcon from "@mui/icons-material/Close";
 
 import { useQuery } from "@tanstack/react-query";
@@ -16,14 +16,17 @@ import { useQueries } from "react-query";
 
 export default function Calendar({ user }) {
   const calendarRef = useRef(null);
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(true);
 
-  const handleClose = (event: React.SyntheticEvent | Event, reason?: string) => {
-    if(reason === 'clickaway'){
-      return
+  const handleClose = (
+    event: React.SyntheticEvent | Event,
+    reason?: string,
+  ) => {
+    if (reason === "clickaway") {
+      return;
     }
-    setOpen(false)
-  }
+    setOpen(false);
+  };
 
   const { events, setEvents } = useCalendarStore();
   const { isEventSelected, setEventSelected } = useCalendarStore();
@@ -32,6 +35,7 @@ export default function Calendar({ user }) {
   const setTracks = useTrackStore((state) => state.setTracks);
 
   const dayClicked = (info) => {
+    console.log(tracks);
     // If the user clicked on an Event, then we know events are in that day
     // So just set isEventSelected
     if (info?.event?.startStr) {
@@ -78,8 +82,7 @@ export default function Calendar({ user }) {
 
   useEffect(() => {
     if (status == "success") {
-      // setOpen(false)
-      console.log(data);
+      console.log("Master Song List", data);
       let temp = createCalendarEvents(data);
       setTracks(temp[0]);
       setEvents(temp[1]);
@@ -103,21 +106,23 @@ export default function Calendar({ user }) {
       <Snackbar
         open={open}
         onClose={handleClose}
-        message={isLoading ? "Fetching your songs. Please wait.." : "Tracks Fetched."}
-        anchorOrigin={{vertical: "bottom", horizontal:"right"}}
+        message={
+          isLoading ? "Fetching your songs. Please wait.." : "Tracks Fetched."
+        }
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         action={
           <React.Fragment>
             <IconButton
               aria-label="close"
               color="inherit"
-              sx={{ p:0.5 }}
+              sx={{ p: 0.5 }}
               onClick={handleClose}
-              >
-                <CloseIcon/>
-              </IconButton>
+            >
+              <CloseIcon />
+            </IconButton>
           </React.Fragment>
         }
-        />
+      />
     </div>
   );
 }

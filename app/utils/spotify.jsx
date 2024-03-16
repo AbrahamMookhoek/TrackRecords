@@ -120,7 +120,7 @@ export async function spotifyGetSavedTracks(access_token) {
                 item.track.duration_ms,
                 item.track.external_urls.spotify,
                 item.track.name,
-                []
+                [],
               ),
             );
 
@@ -293,18 +293,21 @@ async function getAllPlaylistsAndTracks(access_token, username) {
   try {
     var tracksToReturn = [];
     const playlists = await getAllPlaylists(access_token, username);
-    
+
     for (const playlist of playlists) {
       if (playlist.owner.display_name === username) {
-        const playlistTracks = await getAllPlaylistTracks(access_token, playlist.id);
-        const tracksWithPlaylistInfo = playlistTracks.map(track => ({
+        const playlistTracks = await getAllPlaylistTracks(
+          access_token,
+          playlist.id,
+        );
+        const tracksWithPlaylistInfo = playlistTracks.map((track) => ({
           ...track,
           playlistName: playlist.name,
           playlistId: playlist.id,
-          playlistUrl: playlist.external_urls.spotify
+          playlistUrl: playlist.external_urls.spotify,
         }));
         tracksToReturn.push(...tracksWithPlaylistInfo);
-        console.log(`Tracks in playlist ${playlist.name}:`, playlistTracks);
+        // console.log(`Tracks in playlist ${playlist.name}:`, playlistTracks);
       }
     }
 
@@ -315,60 +318,81 @@ async function getAllPlaylistsAndTracks(access_token, username) {
 }
 
 export async function generateMasterSongList(access_token, username) {
-  var songs = await spotifyGetSavedTracks(access_token);
-  var tracksFromPlaylists = await getAllPlaylistsAndTracks(access_token, username)
+  var savedTracks = await spotifyGetSavedTracks(access_token);
+  var tracksFromPlaylists = await getAllPlaylistsAndTracks(
+    access_token,
+    username,
+  );
 
-  try{
-  var formattedTracksFromPlaylists = tracksFromPlaylists.map((playlistItem) => {
-    let artistsNameArray = [];
-    let artistsLinkArray = [];
+  console.log("savedTracks", savedTracks);
+  console.log("tracksFromPlaylists", tracksFromPlaylists);
 
-    if (playlistItem != undefined) {
-      playlistItem.track.artists.forEach((artist) => {
-        artistsNameArray.push(artist.name);
-        artistsLinkArray.push(artist.external_urls.spotify);
-      });
-    }
+  try {
+    var formattedTracksFromPlaylists = [];
+    tracksFromPlaylists.map((playlistItem) => {
+      let artistsNameArray = [];
+      let artistsLinkArray = [];
 
-    let trackObj = new Track(
-      playlistItem.track.uri.split(":").pop(),
-      undefined,
-      playlistItem.track.album.images.length !== 0 ? playlistItem.track.album.images[playlistItem.track.album.images.length - 1].url : "Unknown",
-      playlistItem.track.album.name,
-      artistsNameArray,
-      artistsLinkArray,
-      playlistItem.track.duration_ms,
-      playlistItem.track.external_urls.spotify,
-      playlistItem.track.name,
-      [{name: playlistItem.playlistName, playlist_link: playlistItem.playlistUrl, added_at: playlistItem.added_at.split("T")[0]}],
-    )
+      if (playlistItem != undefined) {
+        playlistItem.track.artists.forEach((artist) => {
+          artistsNameArray.push(artist.name);
+          artistsLinkArray.push(artist.external_urls.spotify);
+        });
+      }
 
-    playlistItem.track = trackObj
+      let trackObj = new Track(
+        playlistItem.track.uri.split(":").pop(),
+        undefined,
+        playlistItem.track.album.images.length !== 0
+          ? playlistItem.track.album.images[
+              playlistItem.track.album.images.length - 1
+            ].url
+          : "Unknown",
+        playlistItem.track.album.name,
+        artistsNameArray,
+        artistsLinkArray,
+        playlistItem.track.duration_ms,
+        playlistItem.track.external_urls.spotify,
+        playlistItem.track.name,
+        [
+          {
+            name: playlistItem.playlistName,
+            playlist_link: playlistItem.playlistUrl,
+            added_at: playlistItem.added_at.split("T")[0],
+          },
+        ],
+      );
 
-    return playlistItem
-  })
-} catch (error){
-  console.log(error)
-}
+      playlistItem.track = trackObj;
 
-try{
-  formattedTracksFromPlaylists.forEach((playlistItem) => {
-    let key = playlistItem.track.spotify_uri.split(":").pop()
+      formattedTracksFromPlaylists.push(playlistItem);
+    });
+  } catch (error) {
+    console.log(error);
+  }
 
-    if(songs.has(key))
-    {
-      let trackObj = songs.get(key)
-      trackObj.playlists_added_to.push({name: playlistItem.playlistName, playlist_link: playlistItem.playlistUrl, added_at: playlistItem.added_at.split("T")[0]})
-    }
-    else{
-      songs.set(key, playlistItem.track)
-    }
-  })
-} catch (error){
-  console.log(error)
-}
+  console.log("formattedTracksFromPlaylists", formattedTracksFromPlaylists);
 
-  return songs;
+  try {
+    formattedTracksFromPlaylists.forEach((playlistItem) => {
+      let key = playlistItem.track.spotify_uri.split(":").pop();
+
+      if (savedTracks.has(key)) {
+        let trackObj = savedTracks.get(key);
+        trackObj.playlists_added_to.push({
+          name: playlistItem.playlistName,
+          playlist_link: playlistItem.playlistUrl,
+          added_at: playlistItem.added_at.split("T")[0],
+        });
+      } else {
+        savedTracks.set(key, playlistItem.track);
+      }
+    });
+  } catch (error) {
+    console.log(error);
+  }
+
+  return savedTracks;
 }
 
 export function createCalendarEvents(tracks) {
@@ -380,7 +404,7 @@ export function createCalendarEvents(tracks) {
   const tracksByDay = new Map();
   tracks.forEach((track) => {
     // currently doesnt check for playlist songs
-    if(track.added_at){
+    if (track.added_at) {
       // Extract the date part from the timestamp
       const dateKey = track.added_at.substring(0, 10);
 
@@ -406,7 +430,7 @@ export function createCalendarEvents(tracks) {
   });
 
   console.log("Events Generated", events);
-  console.log(tracksByDay)
+  console.log(tracksByDay);
 
   return [tracksByDay, events];
 }
