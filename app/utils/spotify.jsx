@@ -68,7 +68,6 @@ export async function spotifyGetSavedTracks(access_token) {
           tracks_added.push(
             new Track(
               item.track.uri.split(":").pop(),
-              item.added_at.split("T")[0],
               item.track.album.images.length !== 0
                 ? item.track.album.images[item.track.album.images.length - 1]
                     .url
@@ -79,7 +78,13 @@ export async function spotifyGetSavedTracks(access_token) {
               item.track.duration_ms,
               item.track.external_urls.spotify,
               item.track.name,
-              [],
+              [
+                {
+                  name: "Liked Songs",
+                  playlist_link: "",
+                  added_at: item.added_at.split("T")[0],
+                },
+              ],
             ),
           );
 
@@ -109,7 +114,6 @@ export async function spotifyGetSavedTracks(access_token) {
             tracks_added.push(
               new Track(
                 item.track.uri.split(":").pop(),
-                item.added_at.split("T")[0],
                 item.track.album.images.length !== 0
                   ? item.track.album.images[item.track.album.images.length - 1]
                       .url
@@ -120,7 +124,13 @@ export async function spotifyGetSavedTracks(access_token) {
                 item.track.duration_ms,
                 item.track.external_urls.spotify,
                 item.track.name,
-                [],
+                [
+                  {
+                    name: "Liked Songs",
+                    playlist_link: "",
+                    added_at: item.added_at.split("T")[0],
+                  },
+                ],
               ),
             );
 
@@ -307,7 +317,6 @@ async function getAllPlaylistsAndTracks(access_token, username) {
           playlistUrl: playlist.external_urls.spotify,
         }));
         tracksToReturn.push(...tracksWithPlaylistInfo);
-        // console.log(`Tracks in playlist ${playlist.name}:`, playlistTracks);
       }
     }
 
@@ -342,7 +351,6 @@ export async function generateMasterSongList(access_token, username) {
 
       let trackObj = new Track(
         playlistItem.track.uri.split(":").pop(),
-        undefined,
         playlistItem.track.album.images.length !== 0
           ? playlistItem.track.album.images[
               playlistItem.track.album.images.length - 1
