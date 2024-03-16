@@ -68,10 +68,7 @@ export async function spotifyGetSavedTracks(access_token) {
           tracks_added.push(
             new Track(
               item.track.uri.split(":").pop(),
-              item.track.album.images.length !== 0
-                ? item.track.album.images[item.track.album.images.length - 1]
-                    .url
-                : "Unknown",
+              item.track.album.images.length !== 0 ? item.track.album.images[item.track.album.images.length - 1].url : "Unknown",
               item.track.album.name,
               artistsNameArray,
               artistsLinkArray,
@@ -85,6 +82,7 @@ export async function spotifyGetSavedTracks(access_token) {
                   added_at: item.added_at.split("T")[0],
                 },
               ],
+              []
             ),
           );
 
@@ -114,10 +112,7 @@ export async function spotifyGetSavedTracks(access_token) {
             tracks_added.push(
               new Track(
                 item.track.uri.split(":").pop(),
-                item.track.album.images.length !== 0
-                  ? item.track.album.images[item.track.album.images.length - 1]
-                      .url
-                  : "Unknown",
+                item.track.album.images.length !== 0 ? item.track.album.images[item.track.album.images.length - 1].url : "Unknown",
                 item.track.album.name,
                 artistsNameArray,
                 artistsLinkArray,
@@ -131,6 +126,7 @@ export async function spotifyGetSavedTracks(access_token) {
                     added_at: item.added_at.split("T")[0],
                   },
                 ],
+                []
               ),
             );
 
@@ -161,97 +157,73 @@ export async function getRecentlyPlayed(access_token) {
     redirect: "follow",
   };
 
+  var tracks_played = [];
+  var artistsNameArray = [];
+  var artistsLinkArray = [];
+  var nextSongBatchLink = "";
+  // below 2 variables are purely for debugging
+  var count = 0;
+  var count_iter = 0;
+
   // get recently listened to
   await fetch(
     "https://api.spotify.com/v1/me/player/recently-played?limit=50",
     requestOptions,
   )
-    .then((response) => response.json())
-    .then((result) => {
-      nextSongBatchLink = result.next;
-      count += result.items.length;
+  .then((response) => response.json())
+  .then((result) => {
+    console.log(result)
+    nextSongBatchLink = result.next;
+    count += result.items.length;
 
-      result.items.forEach((item) => {
-        artistsNameArray = [];
-        artistsLinkArray = [];
+    result.items.forEach((item) => {
+      artistsNameArray = [];
+      artistsLinkArray = [];
 
-        if (item != undefined) {
-          item.track.artists.forEach((artist) => {
-            artistsNameArray.push(artist.name);
-            artistsLinkArray.push(artist.external_urls.spotify);
-          });
-
-          tracks_played.push(
-            new Track(
-              item.track.uri,
-              [],
-              [item.played_at],
-              item.track.album.images.length !== 0
-                ? item.track.album.images[item.track.album.images.length - 1]
-                    .url
-                : "Unknown",
-              item.track.album.name,
-              artistsNameArray,
-              artistsLinkArray,
-              item.track.duration_ms,
-              item.track.external_urls.spotify,
-              item.track.name,
-            ),
-          );
-
-          count_iter += 1;
-        }
-      });
-    })
-    .catch((error) => console.log("error", error));
-
-  while (nextSongBatchLink != null) {
-    await fetch(nextSongBatchLink, requestOptions)
-      .then((response) => response.json())
-      .then((result) => {
-        nextSongBatchLink = result.next;
-        count += result.items.length;
-
-        result.items.forEach((item) => {
-          artistsNameArray = [];
-          artistsLinkArray = [];
-
-          if (item != undefined) {
-            item.track.artists.forEach((artist) => {
-              artistsNameArray.push(artist.name);
-              artistsLinkArray.push(artist.external_urls.spotify);
-            });
-
-            var date_added = item.added_at;
-            date_added = date_added.split("T")[0];
-
-            tracks_played.push(
-              new Track(
-                item.track.uri,
-                [],
-                [item.played_at],
-                item.track.album.images.length !== 0
-                  ? item.track.album.images[item.track.album.images.length - 1]
-                      .url
-                  : "Unknown",
-                item.track.album.name,
-                artistsNameArray,
-                artistsLinkArray,
-                item.track.duration_ms,
-                item.track.external_urls.spotify,
-                item.track.name,
-              ),
-            );
-
-            count_iter += 1;
-          }
+      if (item != undefined) {
+        item.track.artists.forEach((artist) => {
+          artistsNameArray.push(artist.name);
+          artistsLinkArray.push(artist.external_urls.spotify);
         });
-      })
-      .catch((error) => console.log("error", error));
-    // console.log("total songs:",count)
-    console.log("saved songs:", count_iter);
-    console.log("array length:", tracks.length);
+
+        tracks_played.push(
+          new Track(
+            item.track.uri.split(":").pop(),
+            item.track.album.images.length !== 0 ? item.track.album.images[item.track.album.images.length - 1].url : "Unknown",
+            item.track.album.name,
+            artistsNameArray,
+            artistsLinkArray,
+            item.track.duration_ms,
+            item.track.external_urls.spotify,
+            item.track.name,
+            [],
+            [item.played_at]
+          ),
+        );
+        count_iter += 1;
+      }
+    });
+  })
+  .catch((error) => console.log("error", error));
+
+  const trackMap = new Map();
+
+  try {
+    tracks_played.forEach((track) => {
+      if (trackMap.has(track.spotify_uri)) {
+        let trackObj = trackMap.get(track.spotify_uri);
+        trackObj.played_at.push(track.played_at[0]);
+      } else {
+        trackMap.set(track.spotify_uri, track);
+      }
+    });
+  } catch (error) {
+    console.log(error);
   }
+
+  console.log(trackMap);
+
+  return trackMap;
 }
 
 // Function to retrieve all playlists
@@ -328,13 +300,12 @@ async function getAllPlaylistsAndTracks(access_token, username) {
 
 export async function generateMasterSongList(access_token, username) {
   var savedTracks = await spotifyGetSavedTracks(access_token);
-  var tracksFromPlaylists = await getAllPlaylistsAndTracks(
-    access_token,
-    username,
-  );
+  var tracksFromPlaylists = await getAllPlaylistsAndTracks(access_token, username);
+  var playedTracks = await getRecentlyPlayed(access_token)
 
   console.log("savedTracks", savedTracks);
   console.log("tracksFromPlaylists", tracksFromPlaylists);
+  console.log("playedTracks", playedTracks);
 
   try {
     var formattedTracksFromPlaylists = [];
@@ -351,11 +322,7 @@ export async function generateMasterSongList(access_token, username) {
 
       let trackObj = new Track(
         playlistItem.track.uri.split(":").pop(),
-        playlistItem.track.album.images.length !== 0
-          ? playlistItem.track.album.images[
-              playlistItem.track.album.images.length - 1
-            ].url
-          : "Unknown",
+        playlistItem.track.album.images.length !== 0 ? playlistItem.track.album.images[playlistItem.track.album.images.length - 1].url : "Unknown",
         playlistItem.track.album.name,
         artistsNameArray,
         artistsLinkArray,
@@ -369,6 +336,7 @@ export async function generateMasterSongList(access_token, username) {
             added_at: playlistItem.added_at.split("T")[0],
           },
         ],
+        []
       );
 
       playlistItem.track = trackObj;
@@ -394,6 +362,19 @@ export async function generateMasterSongList(access_token, username) {
         });
       } else {
         savedTracks.set(key, playlistItem.track);
+      }
+    });
+  } catch (error) {
+    console.log(error);
+  }
+
+  try {
+    playedTracks.forEach((value,key,map) => {
+      if (savedTracks.has(key)) {
+        let trackObj = savedTracks.get(key);
+        trackObj.played_at = value.played_at;
+      } else {
+        savedTracks.set(key, value);
       }
     });
   } catch (error) {
