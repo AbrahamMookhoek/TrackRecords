@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import DropzoneComponent from "../../components/DropzoneComponent";
+import Dropzone from "../../components/Dropzone";
 
 export default function SettingsPage() {
   const handleDrop = async (acceptedFiles) => {
@@ -10,10 +10,10 @@ export default function SettingsPage() {
     });
 
     var requestOptions = {
-      method: 'POST',
+      method: "POST",
       body: formData,
-      redirect: 'follow'
-    }
+      redirect: "follow",
+    };
 
     try {
       const response = await fetch("/api/process", requestOptions);
@@ -34,7 +34,7 @@ export default function SettingsPage() {
   return (
     <div className="">
       <h1>Upload Files</h1>
-      <DropzoneComponent onDrop={handleDrop} />
+      <Dropzone onDrop={handleDrop} />
     </div>
   );
 }

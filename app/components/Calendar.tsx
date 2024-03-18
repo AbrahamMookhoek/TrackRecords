@@ -14,6 +14,13 @@ import { useQuery } from "@tanstack/react-query";
 import { createCalendarEvents, generateMasterSongList } from "../utils/spotify";
 import { useQueries } from "react-query";
 
+const myCustomButton = {
+  text: "custom!",
+  click: function () {
+    alert("clicked the custom button!");
+  },
+};
+
 export default function Calendar({ user }) {
   const calendarRef = useRef(null);
   const [open, setOpen] = useState(true);
@@ -35,7 +42,6 @@ export default function Calendar({ user }) {
   const setTracks = useTrackStore((state) => state.setTracks);
 
   const dayClicked = (info) => {
-    console.log(tracks);
     // If the user clicked on an Event, then we know events are in that day
     // So just set isEventSelected
     if (info?.event?.startStr) {
@@ -101,13 +107,20 @@ export default function Calendar({ user }) {
         showNonCurrentDates={false}
         height={"100%"}
         dateClick={dayClicked}
-        // eventDidMount={addIconToEvent}
+        customButtons={{
+          myCustomButton,
+        }}
+        headerToolbar={{
+          left: "title",
+          center: "myCustomButton",
+          right: "prev,next",
+        }}
       />
       <Snackbar
         open={open}
         onClose={handleClose}
         message={
-          isLoading ? "Fetching your songs. Please wait.." : "Tracks Fetched."
+          isLoading ? "Fetching your songs. Please wait..." : "Tracks Fetched."
         }
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         action={

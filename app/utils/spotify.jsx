@@ -289,6 +289,7 @@ async function getAllPlaylistsAndTracks(access_token, username) {
           playlistUrl: playlist.external_urls.spotify,
         }));
         tracksToReturn.push(...tracksWithPlaylistInfo);
+        break;
       }
     }
 
@@ -392,18 +393,20 @@ export function createCalendarEvents(tracks) {
 
   const tracksByDay = new Map();
   tracks.forEach((track) => {
-    // currently doesnt check for playlist songs
-    if (track.added_at) {
-      // Extract the date part from the timestamp
-      const dateKey = track.added_at.substring(0, 10);
+    // console.log("track.playlists_added_to", track.playlists_added_to);
+    if (track.playlists_added_to) {
+      track.playlists_added_to.map((playlist) => {
+        // Extract the date part from the timestamp
+        const dateKey = playlist.added_at.substring(0, 10);
 
-      if (tracksByDay.has(dateKey)) {
-        // If the date key exists, add the track to the existing array
-        tracksByDay.get(dateKey).push(track);
-      } else {
-        // If the date key doesn't exist, create a new array with the track
-        tracksByDay.set(dateKey, [track]);
-      }
+        if (tracksByDay.has(dateKey)) {
+          // If the date key exists, add the track to the existing array
+          tracksByDay.get(dateKey).push(track);
+        } else {
+          // If the date key doesn't exist, create a new array with the track
+          tracksByDay.set(dateKey, [track]);
+        }
+      });
     }
   });
 
