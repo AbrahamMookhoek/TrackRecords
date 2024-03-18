@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import unzipper from "unzipper"; // Or use any other zip library
 
 export async function POST(request, response) {
-  const start = Date.now();
   const formData = await request.formData();
   const file = formData.get("files");
   let trackMap = new Map();
@@ -43,24 +42,31 @@ export async function POST(request, response) {
 
   extractedFiles.forEach((file) => {
     file.forEach((obj) => {
+      // if the obj is not empty and the spotify_track_uri is defined then proceed
       if (obj && obj.spotify_track_uri) {
+        // if the track instance was played for more than 30 seconds
         if (obj.ms_played && obj.ms_played > 30 * 1000) {
+          // add the amount of time listened to this track to the overall time listened
           total_listening_time += obj.ms_played / 1000 / 60 / 60 / 24;
+
+          // check to see if the track is already in the map
           if (!trackMap.has(obj.spotify_track_uri.split(":").pop())) {
             trackMap.set(obj.spotify_track_uri.split(":").pop(), {
               name: obj.master_metadata_track_name,
               count: 1,
+              played_at: [obj.ts.split("T")[0]]
             });
           } else {
-            obj = trackMap.get(obj.spotify_track_uri.split(":").pop());
-            obj.count += 1;
+            let tempObj = trackMap.get(obj.spotify_track_uri.split(":").pop());
+            tempObj.count += 1;
+            tempObj.played_at.push(obj.ts.split("T")[0])
           }
         }
+      } else{
+        console.error("Track did not contain uri")
       }
     });
   });
-
-  console.log(trackMap.entries(), total_listening_time);
 
   return NextResponse.json(
     { message: "Success in processing" },
