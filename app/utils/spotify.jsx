@@ -296,6 +296,7 @@ async function getAllPlaylistsAndTracks(access_token, username) {
         }));
         tracksToReturn.push(...tracksWithPlaylistInfo);
       }
+      break;
     }
 
     return tracksToReturn;
@@ -394,7 +395,7 @@ export function createCalendarEvents(tracks) {
   }
   var events = [];
 
-  const tracksByDay = new Map();
+  const addedTracksByDay = new Map();
   tracks.forEach((track_obj, track_uri) => {
     // split track_obj into 2 track obj
     track_obj.playlists_added_to.map((playlist) => {
@@ -412,16 +413,16 @@ export function createCalendarEvents(tracks) {
       );
 
       let tempVal = undefined;
-      if (tracksByDay.has(playlist.added_at)) {
-        tempVal = tracksByDay.get(playlist.added_at);
+      if (addedTracksByDay.has(playlist.added_at)) {
+        tempVal = addedTracksByDay.get(playlist.added_at);
         tempVal.push(tempTrack);
       } else {
-        tracksByDay.set(playlist.added_at, [tempTrack]);
+        addedTracksByDay.set(playlist.added_at, [tempTrack]);
       }
     });
   });
 
-  tracksByDay.forEach((tracksForDate, date) => {
+  addedTracksByDay.forEach((tracksForDate, date) => {
     let currTrack = {
       title: tracksForDate.length + " Added",
       color: "green",
@@ -432,5 +433,46 @@ export function createCalendarEvents(tracks) {
     events.push(currTrack);
   });
 
-  return [tracksByDay, events];
+  const listenedTracksByDay = new Map();
+  tracks.forEach((track_obj, track_uri) => {
+    // split track_obj into 2 track obj
+    track_obj.played_at.map((listened) => {
+      let tempTrack = new Track(
+        track_obj.spotify_uri,
+        track_obj.album_image,
+        track_obj.album_name,
+        track_obj.artist_names,
+        track_obj.artist_url,
+        track_obj.track_duration,
+        track_obj.track_link,
+        track_obj.track_name,
+        track_obj.playlist,
+        listened,
+      );
+
+      let tempVal = undefined;
+      if (listenedTracksByDay.has(listened.split("T")[0])) {
+        tempVal = listenedTracksByDay.get(listened.split("T")[0]);
+        tempVal.push(tempTrack);
+      } else {
+        listenedTracksByDay.set(listened.split("T")[0], [tempTrack]);
+      }
+    });
+  });
+
+  listenedTracksByDay.forEach((tracksForDate, date) => {
+    let currTrack = {
+      title: tracksForDate.length + " Listened",
+      color: "purple",
+      start: date,
+      id: "listenedTrack",
+    };
+
+    events.push(currTrack);
+  });
+
+  console.log("addedTracksByDay", addedTracksByDay);
+  console.log("listenedTracksByDay", listenedTracksByDay);
+
+  return [addedTracksByDay, listenedTracksByDay, events];
 }

@@ -38,9 +38,12 @@ export default function Calendar({ user }) {
   const { events, setEvents } = useCalendarStore();
   const { isEventSelected, setEventSelected } = useCalendarStore();
   const { setDateSelected } = useCalendarStore();
-  const { setTracksOnDate } = useCalendarStore();
-  const tracks = useTrackStore((state) => state.tracks);
-  const setTracks = useTrackStore((state) => state.setTracks);
+  const { setAddedTracksOnDate } = useCalendarStore();
+  const { setListenedTracksOnDate } = useCalendarStore();
+  const addedTracks = useTrackStore((state) => state.addedTracks);
+  const setAddedTracks = useTrackStore((state) => state.setAddedTracks);
+  const listenedTracks = useTrackStore((state) => state.listenedTracks);
+  const setListenedTracks = useTrackStore((state) => state.setListenedTracks);
 
   const dayClicked = (info) => {
     // If the user clicked on an Event, then we know events are in that day
@@ -48,13 +51,20 @@ export default function Calendar({ user }) {
     if (info?.event?.startStr) {
       setDateSelected(info?.event?.startStr);
       setEventSelected(!isEventSelected);
-      const filteredByDay = new Map(
-        [...tracks].filter(([k, v]) => k === info.event.startStr),
+      const filteredAddedTracksByDay = new Map(
+        [...addedTracks].filter(([k, v]) => k === info.event.startStr),
       )
         .values()
         .next().value;
 
-      setTracksOnDate(filteredByDay);
+      const filteredListenedTracksByDay = new Map(
+        [...listenedTracks].filter(([k, v]) => k === info.event.startStr),
+      )
+        .values()
+        .next().value;
+
+      setAddedTracksOnDate(filteredAddedTracksByDay);
+      setListenedTracksOnDate(filteredListenedTracksByDay);
     }
     // This means the user clicked on a day
     else {
@@ -69,13 +79,20 @@ export default function Calendar({ user }) {
       if (filteredEvents.length > 0) {
         setEventSelected(!isEventSelected);
 
-        const filteredByDay = new Map(
-          [...tracks].filter(([k, v]) => k === info.dateStr),
+        const filteredAddedTracksByDay = new Map(
+          [...addedTracks].filter(([k, v]) => k === info.dateStr),
         )
           .values()
           .next().value;
 
-        setTracksOnDate(filteredByDay);
+        const filteredListenedTracksByDay = new Map(
+          [...listenedTracks].filter(([k, v]) => k === info.dateStr),
+        )
+          .values()
+          .next().value;
+
+        setAddedTracksOnDate(filteredAddedTracksByDay);
+        setListenedTracksOnDate(filteredListenedTracksByDay);
       } else {
         setEventSelected(false);
       }
@@ -94,8 +111,9 @@ export default function Calendar({ user }) {
     if (status == "success") {
       // console.log("Master Song List", data);
       let temp = createCalendarEvents(data);
-      setTracks(temp[0]);
-      setEvents(temp[1]);
+      setAddedTracks(temp[0]);
+      setListenedTracks(temp[1]);
+      setEvents(temp[2]);
     }
   }, [data]);
 

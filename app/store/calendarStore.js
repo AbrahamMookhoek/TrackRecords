@@ -1,8 +1,13 @@
 import { create } from "zustand";
 
 export const useCalendarStore = create((set) => ({
-  tracksOnDate: [],
-  setTracksOnDate: (newTracksOnDate) => set({ tracksOnDate: newTracksOnDate }),
+  addedTracksOnDate: [],
+  setAddedTracksOnDate: (newAddedTracksOnDate) =>
+    set({ addedTracksOnDate: newAddedTracksOnDate }),
+
+  listenedTracksOnDate: [],
+  setListenedTracksOnDate: (newListenedTracksOnDate) =>
+    set({ listenedTracksOnDate: newListenedTracksOnDate }),
 
   dateSelected: "",
   setDateSelected: (newDate) => set({ dateSelected: newDate }),

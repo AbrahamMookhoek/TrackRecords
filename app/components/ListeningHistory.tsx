@@ -10,7 +10,8 @@ import { useCalendarStore } from "../store/calendarStore";
 
 export default function () {
   const { isEventSelected, setEventSelected } = useCalendarStore();
-  const { tracksOnDate } = useCalendarStore();
+  const { addedTracksOnDate } = useCalendarStore();
+  const { listenedTracksOnDate } = useCalendarStore();
   const { dateSelected } = useCalendarStore();
 
   return (
@@ -21,11 +22,20 @@ export default function () {
       <div className="flex max-h-min flex-col overflow-auto">
         {isEventSelected ? (
           <List>
-            {tracksOnDate?.map((track) => {
+            {addedTracksOnDate?.map((track) => {
               return (
                 track.playlists_added_to.added_at === dateSelected && (
                   <ListItem key={track.spotify_id}>
-                    <TrackCard track={track} />
+                    <TrackCard track={track} added={true} />
+                  </ListItem>
+                )
+              );
+            })}
+            {listenedTracksOnDate?.map((track) => {
+              return (
+                track.played_at.substring(0, 10) === dateSelected && (
+                  <ListItem key={track.spotify_id}>
+                    <TrackCard track={track} added={false} />
                   </ListItem>
                 )
               );
