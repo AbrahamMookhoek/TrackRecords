@@ -14,6 +14,13 @@ import { useQuery } from "@tanstack/react-query";
 import { createCalendarEvents, generateMasterSongList } from "../utils/spotify";
 import { useQueries } from "react-query";
 
+const myCustomButton = {
+  text: "custom!",
+  click: function () {
+    alert("clicked the custom button!");
+  },
+};
+
 export default function Calendar({ user }) {
   const calendarRef = useRef(null);
   const [open, setOpen] = useState(true);
@@ -30,15 +37,16 @@ export default function Calendar({ user }) {
 
   const { events, setEvents } = useCalendarStore();
   const { isEventSelected, setEventSelected } = useCalendarStore();
+  const { setDateSelected } = useCalendarStore();
   const { setTracksOnDate } = useCalendarStore();
   const tracks = useTrackStore((state) => state.tracks);
   const setTracks = useTrackStore((state) => state.setTracks);
 
   const dayClicked = (info) => {
-    console.log(tracks);
     // If the user clicked on an Event, then we know events are in that day
     // So just set isEventSelected
     if (info?.event?.startStr) {
+      setDateSelected(info?.event?.startStr);
       setEventSelected(!isEventSelected);
       const filteredByDay = new Map(
         [...tracks].filter(([k, v]) => k === info.event.startStr),
@@ -50,6 +58,8 @@ export default function Calendar({ user }) {
     }
     // This means the user clicked on a day
     else {
+      setDateSelected(info.dateStr);
+
       const filteredEvents = events.filter(
         (event) => event.start === info.dateStr,
       );
@@ -82,7 +92,7 @@ export default function Calendar({ user }) {
 
   useEffect(() => {
     if (status == "success") {
-      console.log("Master Song List", data);
+      // console.log("Master Song List", data);
       let temp = createCalendarEvents(data);
       setTracks(temp[0]);
       setEvents(temp[1]);
@@ -101,13 +111,20 @@ export default function Calendar({ user }) {
         showNonCurrentDates={false}
         height={"100%"}
         dateClick={dayClicked}
-        // eventDidMount={addIconToEvent}
+        customButtons={{
+          myCustomButton,
+        }}
+        headerToolbar={{
+          left: "title",
+          center: "myCustomButton",
+          right: "prev,next",
+        }}
       />
       <Snackbar
         open={open}
         onClose={handleClose}
         message={
-          isLoading ? "Fetching your songs. Please wait.." : "Tracks Fetched."
+          isLoading ? "Fetching your songs. Please wait..." : "Tracks Fetched."
         }
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         action={

@@ -68,7 +68,10 @@ export async function spotifyGetSavedTracks(access_token) {
           tracks_added.push(
             new Track(
               item.track.uri.split(":").pop(),
-              item.track.album.images.length !== 0 ? item.track.album.images[item.track.album.images.length - 1].url : "Unknown",
+              item.track.album.images.length !== 0
+                ? item.track.album.images[item.track.album.images.length - 1]
+                    .url
+                : "Unknown",
               item.track.album.name,
               artistsNameArray,
               artistsLinkArray,
@@ -82,7 +85,7 @@ export async function spotifyGetSavedTracks(access_token) {
                   added_at: item.added_at.split("T")[0],
                 },
               ],
-              []
+              [],
             ),
           );
 
@@ -112,7 +115,10 @@ export async function spotifyGetSavedTracks(access_token) {
             tracks_added.push(
               new Track(
                 item.track.uri.split(":").pop(),
-                item.track.album.images.length !== 0 ? item.track.album.images[item.track.album.images.length - 1].url : "Unknown",
+                item.track.album.images.length !== 0
+                  ? item.track.album.images[item.track.album.images.length - 1]
+                      .url
+                  : "Unknown",
                 item.track.album.name,
                 artistsNameArray,
                 artistsLinkArray,
@@ -126,7 +132,7 @@ export async function spotifyGetSavedTracks(access_token) {
                     added_at: item.added_at.split("T")[0],
                   },
                 ],
-                []
+                [],
               ),
             );
 
@@ -175,35 +181,38 @@ export async function getRecentlyPlayed(access_token) {
   .then((result) => {
     count += result.items.length;
 
-    result.items.forEach((item) => {
-      artistsNameArray = [];
-      artistsLinkArray = [];
+      result.items.forEach((item) => {
+        artistsNameArray = [];
+        artistsLinkArray = [];
 
-      if (item != undefined) {
-        item.track.artists.forEach((artist) => {
-          artistsNameArray.push(artist.name);
-          artistsLinkArray.push(artist.external_urls.spotify);
-        });
+        if (item != undefined) {
+          item.track.artists.forEach((artist) => {
+            artistsNameArray.push(artist.name);
+            artistsLinkArray.push(artist.external_urls.spotify);
+          });
 
-        tracks_played.push(
-          new Track(
-            item.track.uri.split(":").pop(),
-            item.track.album.images.length !== 0 ? item.track.album.images[item.track.album.images.length - 1].url : "Unknown",
-            item.track.album.name,
-            artistsNameArray,
-            artistsLinkArray,
-            item.track.duration_ms,
-            item.track.external_urls.spotify,
-            item.track.name,
-            [],
-            [item.played_at]
-          ),
-        );
-        count_iter += 1;
-      }
-    });
-  })
-  .catch((error) => console.log("error", error));
+          tracks_played.push(
+            new Track(
+              item.track.uri.split(":").pop(),
+              item.track.album.images.length !== 0
+                ? item.track.album.images[item.track.album.images.length - 1]
+                    .url
+                : "Unknown",
+              item.track.album.name,
+              artistsNameArray,
+              artistsLinkArray,
+              item.track.duration_ms,
+              item.track.external_urls.spotify,
+              item.track.name,
+              [],
+              [item.played_at],
+            ),
+          );
+          count_iter += 1;
+        }
+      });
+    })
+    .catch((error) => console.log("error", error));
 
   const trackMap = new Map();
 
@@ -219,8 +228,6 @@ export async function getRecentlyPlayed(access_token) {
   } catch (error) {
     console.log(error);
   }
-
-  console.log(trackMap);
 
   return trackMap;
 }
@@ -317,7 +324,11 @@ export async function generateMasterSongList(access_token, username) {
 
       let trackObj = new Track(
         playlistItem.track.uri.split(":").pop(),
-        playlistItem.track.album.images.length !== 0 ? playlistItem.track.album.images[playlistItem.track.album.images.length - 1].url : "Unknown",
+        playlistItem.track.album.images.length !== 0
+          ? playlistItem.track.album.images[
+              playlistItem.track.album.images.length - 1
+            ].url
+          : "Unknown",
         playlistItem.track.album.name,
         artistsNameArray,
         artistsLinkArray,
@@ -331,7 +342,7 @@ export async function generateMasterSongList(access_token, username) {
             added_at: playlistItem.added_at.split("T")[0],
           },
         ],
-        []
+        [],
       );
 
       playlistItem.track = trackObj;
@@ -362,7 +373,7 @@ export async function generateMasterSongList(access_token, username) {
   }
 
   try {
-    playedTracks.forEach((value,key,map) => {
+    playedTracks.forEach((value, key, map) => {
       if (savedTracks.has(key)) {
         let trackObj = savedTracks.get(key);
         trackObj.played_at = value.played_at;
@@ -384,20 +395,30 @@ export function createCalendarEvents(tracks) {
   var events = [];
 
   const tracksByDay = new Map();
-  tracks.forEach((track) => {
-    // currently doesnt check for playlist songs
-    if (track.added_at) {
-      // Extract the date part from the timestamp
-      const dateKey = track.added_at.substring(0, 10);
+  tracks.forEach((track_obj, track_uri) => {
+    // split track_obj into 2 track obj
+    track_obj.playlists_added_to.map((playlist) => {
+      let tempTrack = new Track(
+        track_obj.spotify_uri,
+        track_obj.album_image,
+        track_obj.album_name,
+        track_obj.artist_names,
+        track_obj.artist_url,
+        track_obj.track_duration,
+        track_obj.track_link,
+        track_obj.track_name,
+        playlist,
+        track_obj.played_at,
+      );
 
-      if (tracksByDay.has(dateKey)) {
-        // If the date key exists, add the track to the existing array
-        tracksByDay.get(dateKey).push(track);
+      let tempVal = undefined;
+      if (tracksByDay.has(playlist.added_at)) {
+        tempVal = tracksByDay.get(playlist.added_at);
+        tempVal.push(tempTrack);
       } else {
-        // If the date key doesn't exist, create a new array with the track
-        tracksByDay.set(dateKey, [track]);
+        tracksByDay.set(playlist.added_at, [tempTrack]);
       }
-    }
+    });
   });
 
   tracksByDay.forEach((tracksForDate, date) => {
@@ -410,9 +431,6 @@ export function createCalendarEvents(tracks) {
 
     events.push(currTrack);
   });
-
-  console.log("Events Generated", events);
-  console.log(tracksByDay);
 
   return [tracksByDay, events];
 }
