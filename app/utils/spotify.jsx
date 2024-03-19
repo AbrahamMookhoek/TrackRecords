@@ -160,20 +160,19 @@ export async function getRecentlyPlayed(access_token) {
   var tracks_played = [];
   var artistsNameArray = [];
   var artistsLinkArray = [];
-  var nextSongBatchLink = "";
   // below 2 variables are purely for debugging
   var count = 0;
   var count_iter = 0;
 
-  // get recently listened to
+  // get recently listened to up to 50 songs
+  // TODO: We need to somehow save the Unix Epoch time and update it everytime we run this query
+  //       We can save this in Firebase under the user and slap it on to the url using "before=UNIX EPOCH TIME"
   await fetch(
     "https://api.spotify.com/v1/me/player/recently-played?limit=50",
     requestOptions,
   )
   .then((response) => response.json())
   .then((result) => {
-    console.log(result)
-    nextSongBatchLink = result.next;
     count += result.items.length;
 
     result.items.forEach((item) => {
@@ -303,10 +302,6 @@ export async function generateMasterSongList(access_token, username) {
   var tracksFromPlaylists = await getAllPlaylistsAndTracks(access_token, username);
   var playedTracks = await getRecentlyPlayed(access_token)
 
-  console.log("savedTracks", savedTracks);
-  console.log("tracksFromPlaylists", tracksFromPlaylists);
-  console.log("playedTracks", playedTracks);
-
   try {
     var formattedTracksFromPlaylists = [];
     tracksFromPlaylists.map((playlistItem) => {
@@ -346,8 +341,6 @@ export async function generateMasterSongList(access_token, username) {
   } catch (error) {
     console.log(error);
   }
-
-  console.log("formattedTracksFromPlaylists", formattedTracksFromPlaylists);
 
   try {
     formattedTracksFromPlaylists.forEach((playlistItem) => {

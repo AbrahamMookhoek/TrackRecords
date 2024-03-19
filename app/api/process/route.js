@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import unzipper from "unzipper"; // Or use any other zip library
+import {writeListeningHistoryToFireStore} from '@/app/firebase/firebase';
+import { getServerSession } from "next-auth";
+import { options } from "@/app/api/auth/[...nextauth]/options";
 
 export async function POST(request, response) {
   const formData = await request.formData();
   const file = formData.get("files");
   let trackMap = new Map();
+  const session = await getServerSession(options)
 
   if (!file) {
     return NextResponse.json({ message: "No file was attached to this request" }, { status: 500 });
@@ -31,7 +35,7 @@ export async function POST(request, response) {
       return parsedContent; // Return the parsed content
     } catch (error) {
       console.error("Error processing audio history file:", error);
-      throw error; // Propagate the error to the outer catch block
+      return NextResponse.json({message: "Error processing audio history zip file"}, {status: 500})
     }
   });
 
@@ -59,7 +63,7 @@ export async function POST(request, response) {
           } else {
             let tempObj = trackMap.get(obj.spotify_track_uri.split(":").pop());
             tempObj.count += 1;
-            tempObj.played_at.push(obj.ts.split("T")[0])
+            tempObj.played_at.push(obj.ts)
           }
         }
       } else{
@@ -67,6 +71,13 @@ export async function POST(request, response) {
       }
     });
   });
+
+  try{
+    await writeListeningHistoryToFireStore(session.user.name, trackMap)
+  } catch (error){
+    console.log(error)
+    return NextResponse.json({message: "Failed uploading data to firebase"}, {status: 500})
+  }
 
   return NextResponse.json(
     { message: "Success in processing" },
