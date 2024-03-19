@@ -7,7 +7,7 @@ export default function ({ track, added }) {
         <a
           href={track.track_link}
           target="_blank"
-          className="flex flex-col items-center rounded-lg border border-gray-200 bg-green-500 bg-white shadow hover:bg-gray-100 md:max-w-xl md:flex-row dark:border-gray-700 dark:hover:bg-gray-700"
+          className="flex flex-col items-center rounded-lg border border-gray-200 dark:bg-green-500 bg-white shadow hover:bg-gray-100 md:max-w-xl md:flex-row dark:border-gray-700 dark:hover:bg-gray-700"
         >
           <img
             className="h-14 w-14 rounded-t-lg object-cover"
@@ -40,7 +40,7 @@ export default function ({ track, added }) {
         <a
           href={track.track_link}
           target="_blank"
-          className="flex flex-col items-center rounded-lg border border-gray-200 bg-purple-500 bg-white shadow hover:bg-gray-100 md:max-w-xl md:flex-row dark:border-gray-700 dark:hover:bg-gray-700"
+          className="flex flex-col items-center rounded-lg border border-gray-200 dark:bg-purple-500 bg-white shadow hover:bg-gray-100 md:max-w-xl md:flex-row dark:border-gray-700 dark:hover:bg-gray-700"
         >
           <img
             className="h-14 w-14 rounded-t-lg object-cover"
