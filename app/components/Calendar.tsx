@@ -37,6 +37,7 @@ export default function Calendar({ user }) {
 
   const { events, setEvents } = useCalendarStore();
   const { isEventSelected, setEventSelected } = useCalendarStore();
+  const { setDateSelected } = useCalendarStore();
   const { setTracksOnDate } = useCalendarStore();
   const tracks = useTrackStore((state) => state.tracks);
   const setTracks = useTrackStore((state) => state.setTracks);
@@ -45,6 +46,7 @@ export default function Calendar({ user }) {
     // If the user clicked on an Event, then we know events are in that day
     // So just set isEventSelected
     if (info?.event?.startStr) {
+      setDateSelected(info?.event?.startStr);
       setEventSelected(!isEventSelected);
       const filteredByDay = new Map(
         [...tracks].filter(([k, v]) => k === info.event.startStr),
@@ -56,6 +58,8 @@ export default function Calendar({ user }) {
     }
     // This means the user clicked on a day
     else {
+      setDateSelected(info.dateStr);
+
       const filteredEvents = events.filter(
         (event) => event.start === info.dateStr,
       );
@@ -88,7 +92,7 @@ export default function Calendar({ user }) {
 
   useEffect(() => {
     if (status == "success") {
-      console.log("Master Song List", data);
+      // console.log("Master Song List", data);
       let temp = createCalendarEvents(data);
       setTracks(temp[0]);
       setEvents(temp[1]);
