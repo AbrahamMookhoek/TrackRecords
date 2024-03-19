@@ -50,7 +50,7 @@ export default function Calendar({ user }) {
     // So just set isEventSelected
     if (info?.event?.startStr) {
       setDateSelected(info?.event?.startStr);
-      setEventSelected(!isEventSelected);
+      setEventSelected(true);
       const filteredAddedTracksByDay = new Map(
         [...addedTracks].filter(([k, v]) => k === info.event.startStr),
       )
@@ -77,7 +77,7 @@ export default function Calendar({ user }) {
       // Check if the clicked day is even a day they added or listned to tracks
       // If they have, "select" that day
       if (filteredEvents.length > 0) {
-        setEventSelected(!isEventSelected);
+        setEventSelected(true);
 
         const filteredAddedTracksByDay = new Map(
           [...addedTracks].filter(([k, v]) => k === info.dateStr),

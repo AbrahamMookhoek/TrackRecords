@@ -42,7 +42,7 @@ export default function () {
             })}
           </List>
         ) : (
-          <h4 className="ml-4 flex max-h-min flex-col items-stretch overflow-auto">
+          <h4 className="ml-4 flex max-h-min flex-col items-stretch overflow-auto text-center">
             No Date Selected
           </h4>
         )}

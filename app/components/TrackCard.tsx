@@ -1,21 +1,31 @@
 "use client";
 
 export default function ({ track, added }) {
+  function convertTimestamp(timestamp) {
+    const date = new Date(timestamp);
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const ampm = hours >= 12 ? "pm" : "am";
+    const formattedHours = hours % 12 === 0 ? 12 : hours % 12;
+    const formattedMinutes = minutes < 10 ? "0" + minutes : minutes;
+    return `${formattedHours}:${formattedMinutes} ${ampm}`;
+  }
+
   if (added === true) {
     return (
       <div className="flex w-full flex-col">
         <a
           href={track.track_link}
           target="_blank"
-          className="flex flex-col items-center rounded-lg border border-gray-200 dark:bg-green-500 bg-white shadow hover:bg-gray-100 md:max-w-xl md:flex-row dark:border-gray-700 dark:hover:bg-gray-700"
+          className="flex flex-col items-center rounded-lg border border-gray-200 bg-white shadow hover:bg-gray-100 md:max-w-xl md:flex-row dark:border-gray-700 dark:bg-green-700 dark:hover:bg-gray-700"
         >
           <img
-            className="h-14 w-14 rounded-t-lg object-cover"
+            className="h-14 w-14 rounded-lg object-cover"
             src={track.album_image}
             alt="XYZ"
           />
           <div className="flex flex-col justify-between p-1 leading-normal">
-            <div className="flex flex-row justify-between p-1 leading-normal">
+            <div className="flex flex-row justify-between leading-normal">
               <p className="text-md pl-1 font-bold tracking-tight text-gray-900 dark:text-white">
                 {track.track_name}
               </p>
@@ -40,15 +50,15 @@ export default function ({ track, added }) {
         <a
           href={track.track_link}
           target="_blank"
-          className="flex flex-col items-center rounded-lg border border-gray-200 dark:bg-purple-500 bg-white shadow hover:bg-gray-100 md:max-w-xl md:flex-row dark:border-gray-700 dark:hover:bg-gray-700"
+          className="flex flex-col items-center rounded-lg border border-gray-200 bg-white shadow hover:bg-gray-100 md:max-w-xl md:flex-row dark:border-gray-700 dark:bg-purple-700 dark:hover:bg-gray-700"
         >
           <img
-            className="h-14 w-14 rounded-t-lg object-cover"
+            className="h-14 w-14 rounded-lg object-cover"
             src={track.album_image}
             alt="XYZ"
           />
           <div className="flex flex-col justify-between p-1 leading-normal">
-            <div className="flex flex-row justify-between p-1 leading-normal">
+            <div className="justify-betweenc flex flex-row leading-normal">
               <p className="text-md pl-1 font-bold tracking-tight text-gray-900 dark:text-white">
                 {track.track_name}
               </p>
@@ -56,7 +66,7 @@ export default function ({ track, added }) {
                 at
               </p>
               <p className="text-md pl-1 font-bold tracking-tight text-gray-900 dark:text-white">
-                {track.played_at}
+                {convertTimestamp(track.played_at)}
               </p>
             </div>
 
