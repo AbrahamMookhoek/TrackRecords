@@ -121,6 +121,39 @@ export async function updateTracks(spotifyTotalTracks, username)
   return true;
 }
 
+export async function writeListeningHistoryToFireStore(username,listeningHistory,) {
+  const queryForUser = query(
+    collection(db, "users"),
+    where("name", "==", username),
+  );
+  const userSnap = await getDocs(queryForUser);
+
+  const userId = userSnap.docs[0].id;
+  console.log(userId);
+
+  const userHistory = query(
+    collection(db, "users", userSnap.docs[0].id, "history"),
+  );
+  const userHistorySnap = await getDocs(userHistory);
+
+  if(userHistorySnap.size > 0)
+  {
+    console.log(userHistorySnap.size)
+    return
+  }
+
+  console.log(userHistorySnap.docs);
+
+  for (let [key, value] of listeningHistory) {
+    try {
+      const docRef = doc(db, "users", userId, "history", key);
+      await setDoc(docRef, { played_at: value.played_at });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+}
+
 export async function getUserEpoch(username) {
   const queryForUser = query(
     collection(db, "users"),
