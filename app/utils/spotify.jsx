@@ -1,4 +1,5 @@
 import { Track } from "../shared_objects/Track";
+import { getUserEpoch } from "@/app/firebase/firebase"
 
 export default async function refreshAccessToken(refresh_token) {
   var refresh_token = refresh_token;
@@ -169,6 +170,9 @@ export async function getRecentlyPlayed(access_token) {
   // below 2 variables are purely for debugging
   var count = 0;
   var count_iter = 0;
+
+  // console.log("TESTING EPOCHS:");
+  // const epochParam = getUserEpoch(username);
 
   // get recently listened to up to 50 songs
   // TODO: We need to somehow save the Unix Epoch time and update it everytime we run this query
@@ -385,6 +389,10 @@ export async function generateMasterSongList(access_token, username) {
   } catch (error) {
     console.log(error);
   }
+
+  console.log("TESTING EPOCHS:");
+  const queryParam = getUserEpoch(username);
+
 
   return savedTracks;
 }

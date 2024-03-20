@@ -1,13 +1,6 @@
 import { db } from "@/app/firebase/config";
 import { Track } from "../shared_objects/Track";
-import {
-  collection,
-  doc,
-  setDoc,
-  getDocs,
-  query,
-  where,
-} from "firebase/firestore";
+import { collection, doc, setDoc, getDocs, updateDoc, query, where } from "firebase/firestore";
 
 export async function writeTracksToFirestore(user_name, tracks) {
   const queryForUser = query(
@@ -111,65 +104,44 @@ export async function readMonthTracksFromFirestore(user_name, month) {
   return tracks;
 }
 
-export async function updateTracks(spotifyTotalTracks, username) {
-  const queryForUser = query(
-    collection(db, "users"),
-    where("name", "==", username),
-  );
+export async function updateTracks(spotifyTotalTracks, username)
+{
+  const queryForUser = query(collection(db, "users"), where("name", "==", username));
   const userSnap = await getDocs(queryForUser);
 
-  const queryForExistingTracks = query(
-    collection(db, "users", userSnap.docs[0].id, "tracks"),
-  );
+  const queryForExistingTracks = query(collection(db, "users", userSnap.docs[0].id, "tracks"));
   const queryForExistingTracksSnap = await getDocs(queryForExistingTracks);
 
-  if (spotifyTotalTracks == queryForExistingTracksSnap.size) {
-    console.log(
-      "No need to write to Firestore, user's library has not changed",
-    );
-    return false;
+  if(spotifyTotalTracks == queryForExistingTracksSnap.size)
+  {
+    console.log("No need to write to Firestore, user's library has not changed");
+    return false; 
   }
 
   return true;
 }
 
-export async function writeListeningHistoryToFireStore(username,listeningHistory,) {
+export async function getUserEpoch(username) {
   const queryForUser = query(
     collection(db, "users"),
     where("name", "==", username),
   );
   const userSnap = await getDocs(queryForUser);
 
-  const userId = userSnap.docs[0].id;
-  console.log(userId);
+  var queryParam = "";
+  var oldEpoch = undefined;
+  if (userSnap.docs[0] !== undefined) {
+    oldEpoch = userSnap.docs[0].data().epoch;
+  }
+  console.log(oldEpoch);
 
-  const userHistory = query(
-    collection(db, "users", userSnap.docs[0].id, "history"),
-  );
-  const userHistorySnap = await getDocs(userHistory);
-
-  if(userHistorySnap.size > 0)
-  {
-    console.log(userHistorySnap.size)
-    return
+  if (oldEpoch !== undefined) {
+    queryParam = "?after=" + oldEpoch;
   }
 
-  console.log(userHistorySnap.docs);
+  await updateDoc(doc(db, "users", userSnap.docs[0].id), {
+    epoch: Date.now(),
+  });
 
-  for (let [key, value] of listeningHistory) {
-    try {
-      const docRef = doc(db, "users", userId, "history", key);
-      await setDoc(docRef, { played_at: value.played_at });
-    } catch (error) {
-      console.log(error);
-    }
-  }
-}
-
-export async function getEpochTime(username) {
-  // TODO: Fill in logic to retrieve the epoch time last used
-}
-
-export async function setEpochTime(username) {
-  // TODO: Fill in logic to update the new epoch time whenever a new track is received
+  return queryParam;
 }
