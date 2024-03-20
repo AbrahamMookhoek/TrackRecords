@@ -12,14 +12,7 @@ import CloseIcon from "@mui/icons-material/Close";
 
 import { useQuery } from "@tanstack/react-query";
 import { createCalendarEvents, generateMasterSongList } from "../utils/spotify";
-import { useQueries } from "react-query";
-
-const myCustomButton = {
-  text: "custom!",
-  click: function () {
-    alert("clicked the custom button!");
-  },
-};
+import PlaylistFilter from "./PlaylistFilter";
 
 export default function Calendar({ user }) {
   const calendarRef = useRef(null);
@@ -118,7 +111,7 @@ export default function Calendar({ user }) {
   }, [data]);
 
   return (
-    <div className="col-span-5 mr-32 rounded-lg bg-light_blue-100 p-2 text-black shadow-lg">
+    <div className="relative col-span-5 mr-32 rounded-lg bg-light_blue-100 p-2 text-black shadow-lg">
       <FullCalendar
         ref={calendarRef}
         events={events}
@@ -129,15 +122,12 @@ export default function Calendar({ user }) {
         showNonCurrentDates={false}
         height={"100%"}
         dateClick={dayClicked}
-        customButtons={{
-          myCustomButton,
-        }}
         headerToolbar={{
           left: "title",
-          center: "myCustomButton",
           right: "prev,next",
         }}
       />
+      <PlaylistFilter />
       <Snackbar
         open={open}
         onClose={handleClose}

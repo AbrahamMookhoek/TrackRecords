@@ -1,5 +1,5 @@
 import { Track } from "../shared_objects/Track";
-import { getUserEpoch } from "@/app/firebase/firebase"
+import { getUserEpoch } from "@/app/firebase/firebase";
 
 export default async function refreshAccessToken(refresh_token) {
   var refresh_token = refresh_token;
@@ -181,9 +181,9 @@ export async function getRecentlyPlayed(access_token) {
     "https://api.spotify.com/v1/me/player/recently-played?limit=50",
     requestOptions,
   )
-  .then((response) => response.json())
-  .then((result) => {
-    count += result.items.length;
+    .then((response) => response.json())
+    .then((result) => {
+      count += result.items.length;
 
       result.items.forEach((item) => {
         artistsNameArray = [];
@@ -285,7 +285,6 @@ async function getAllPlaylistsAndTracks(access_token, username) {
   try {
     var tracksToReturn = [];
     const playlists = await getAllPlaylists(access_token, username);
-
     for (const playlist of playlists) {
       if (playlist.owner.display_name === username) {
         const playlistTracks = await getAllPlaylistTracks(
@@ -311,8 +310,11 @@ async function getAllPlaylistsAndTracks(access_token, username) {
 
 export async function generateMasterSongList(access_token, username) {
   var savedTracks = await spotifyGetSavedTracks(access_token);
-  var tracksFromPlaylists = await getAllPlaylistsAndTracks(access_token, username);
-  var playedTracks = await getRecentlyPlayed(access_token)
+  var tracksFromPlaylists = await getAllPlaylistsAndTracks(
+    access_token,
+    username,
+  );
+  var playedTracks = await getRecentlyPlayed(access_token);
 
   try {
     var formattedTracksFromPlaylists = [];
@@ -392,7 +394,6 @@ export async function generateMasterSongList(access_token, username) {
 
   console.log("TESTING EPOCHS:");
   const queryParam = getUserEpoch(username);
-
 
   return savedTracks;
 }

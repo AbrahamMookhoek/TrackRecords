@@ -9,7 +9,7 @@ export const HEADER_LINKS = [
 
 // DASHBOARD NAVIGATION
 export const NAV_LINKS = [
-  { href: "/dashboard/calendar", key: "calendar", label: "Calendar" },
+  { href: "/dashboard/", key: "calendar", label: "Calendar" },
   { href: "/dashboard/statistics", key: "statistics", label: "Statistics" },
   { href: "/dashboard/journal", key: "journal", label: "Journal" },
 ];
