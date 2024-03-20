@@ -1,5 +1,5 @@
 import { Track } from "../shared_objects/Track";
-import { getUserEpoch } from "@/app/firebase/firebase"
+import { getUserEpoch, readListeningHistoryFromFirestore, writeListeningHistoryToFireStore } from "@/app/firebase/firebase"
 
 export default async function refreshAccessToken(refresh_token) {
   var refresh_token = refresh_token;
@@ -154,7 +154,7 @@ export async function spotifyGetSavedTracks(access_token) {
   return trackMap;
 }
 
-export async function getRecentlyPlayed(access_token) {
+export async function getRecentlyPlayed(access_token, username) {
   var myHeaders = new Headers();
   myHeaders.append("Authorization", "Bearer " + access_token);
 
@@ -171,24 +171,27 @@ export async function getRecentlyPlayed(access_token) {
   var count = 0;
   var count_iter = 0;
 
-  // console.log("TESTING EPOCHS:");
-  // const epochParam = getUserEpoch(username);
+  console.log("TESTING EPOCHS:");
+  const queryParam = await getUserEpoch(username);
 
   // get recently listened to up to 50 songs
   // TODO: We need to somehow save the Unix Epoch time and update it everytime we run this query
   //       We can save this in Firebase under the user and slap it on to the url using "before=UNIX EPOCH TIME"
   await fetch(
-    "https://api.spotify.com/v1/me/player/recently-played?limit=50",
+    "https://api.spotify.com/v1/me/player/recently-played?limit=50"+queryParam,
     requestOptions,
   )
   .then((response) => response.json())
   .then((result) => {
-    count += result.items.length;
+    if(result.items != undefined) {
+      console.log(result.items.length);
 
+      count += result.items.length;
+      
       result.items.forEach((item) => {
         artistsNameArray = [];
         artistsLinkArray = [];
-
+        
         if (item != undefined) {
           item.track.artists.forEach((artist) => {
             artistsNameArray.push(artist.name);
@@ -215,8 +218,9 @@ export async function getRecentlyPlayed(access_token) {
           count_iter += 1;
         }
       });
-    })
-    .catch((error) => console.log("error", error));
+    }
+  })
+  .catch((error) => console.log("error", error));
 
   const trackMap = new Map();
 
@@ -233,7 +237,9 @@ export async function getRecentlyPlayed(access_token) {
     console.log(error);
   }
 
-  return trackMap;
+  await writeListeningHistoryToFireStore(username, trackMap);
+
+  return;
 }
 
 // Function to retrieve all playlists
@@ -312,7 +318,11 @@ async function getAllPlaylistsAndTracks(access_token, username) {
 export async function generateMasterSongList(access_token, username) {
   var savedTracks = await spotifyGetSavedTracks(access_token);
   var tracksFromPlaylists = await getAllPlaylistsAndTracks(access_token, username);
-  var playedTracks = await getRecentlyPlayed(access_token)
+  try{
+    await getRecentlyPlayed(access_token, username)
+  } catch (error){ console.log(error)}
+  const listening_history = await readListeningHistoryFromFirestore(username);
+  console.log("Listen History:", listening_history);
 
   try {
     var formattedTracksFromPlaylists = [];
@@ -329,11 +339,7 @@ export async function generateMasterSongList(access_token, username) {
 
       let trackObj = new Track(
         playlistItem.track.uri.split(":").pop(),
-        playlistItem.track.album.images.length !== 0
-          ? playlistItem.track.album.images[
-              playlistItem.track.album.images.length - 1
-            ].url
-          : "Unknown",
+        playlistItem.track.album.images.length !== 0 ? playlistItem.track.album.images[playlistItem.track.album.images.length - 1].url : "Unknown",
         playlistItem.track.album.name,
         artistsNameArray,
         artistsLinkArray,
@@ -378,21 +384,33 @@ export async function generateMasterSongList(access_token, username) {
   }
 
   try {
-    playedTracks.forEach((value, key, map) => {
-      if (savedTracks.has(key)) {
-        let trackObj = savedTracks.get(key);
-        trackObj.played_at = value.played_at;
-      } else {
-        savedTracks.set(key, value);
+    listening_history.forEach((doc) => {
+      if(savedTracks.has(doc.id)) {
+        console.log(doc.data());
+        let trackObj = savedTracks.get(doc.id);
+        const docData = doc.data()
+        trackObj.played_at = trackObj.played_at.concat(docData.played_at);
       }
-    });
+      else {
+        // add tracks that aren't saved to the list
+      }
+    })
   } catch (error) {
     console.log(error);
   }
 
-  console.log("TESTING EPOCHS:");
-  const queryParam = getUserEpoch(username);
-
+  // try {
+  //   playedTracks.forEach((value, key, map) => {
+  //     if (savedTracks.has(key)) {
+  //       let trackObj = savedTracks.get(key);
+  //       trackObj.played_at = value.played_at;
+  //     } else {
+  //       savedTracks.set(key, value);
+  //     }
+  //   });
+  // } catch (error) {
+  //   console.log(error);
+  // }
 
   return savedTracks;
 }

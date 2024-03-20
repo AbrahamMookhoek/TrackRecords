@@ -1,6 +1,6 @@
 import { db } from "@/app/firebase/config";
 import { Track } from "../shared_objects/Track";
-import { collection, doc, setDoc, getDocs, updateDoc, query, where } from "firebase/firestore";
+import { collection, doc, setDoc, getDocs, updateDoc, query, where, arrayUnion, getDoc } from "firebase/firestore";
 
 export async function writeTracksToFirestore(user_name, tracks) {
   const queryForUser = query(
@@ -129,36 +129,56 @@ export async function writeListeningHistoryToFireStore(username,listeningHistory
   const userSnap = await getDocs(queryForUser);
 
   const userId = userSnap.docs[0].id;
-  console.log(userId);
 
-  const userHistory = query(
-    collection(db, "users", userSnap.docs[0].id, "history"),
-  );
+  const userHistory = query(collection(db, "users", userSnap.docs[0].id, "history"));
   const userHistorySnap = await getDocs(userHistory);
 
   if(userHistorySnap.size > 0)
   {
     console.log(userHistorySnap.size)
-    return
   }
-
-  console.log(userHistorySnap.docs);
 
   for (let [key, value] of listeningHistory) {
-    try {
       const docRef = doc(db, "users", userId, "history", key);
-      await setDoc(docRef, { played_at: value.played_at });
-    } catch (error) {
-      console.log(error);
+      const docSnap = await getDoc(docRef)
+      const docData = docSnap.data()
+
+      if(docData != undefined)
+      {
+      console.log("docData:", docData)
+      console.log("value:", value)
+      await updateDoc(
+        docRef, 
+        { 
+          played_at: docData.played_at.concat(value.played_at)
+        }
+      )
     }
+      else{
+        console.log("NO ASSOCIATED ENTRY FOUND")
+        setDoc(docRef, { played_at: value.played_at });
+      }
+
   }
+}
+
+export async function readListeningHistoryFromFirestore(username) {
+  let trackMap = new Map();
+  
+  const queryForUser = query(
+    collection(db, "users"), where("name", "==", username));
+  const userSnap = await getDocs(queryForUser);
+
+  const firestore_history = await getDocs(
+    collection(db, "users", userSnap.docs[0].id, "history"),
+  );
+
+  return firestore_history;
 }
 
 export async function getUserEpoch(username) {
   const queryForUser = query(
-    collection(db, "users"),
-    where("name", "==", username),
-  );
+    collection(db, "users"), where("name", "==", username));
   const userSnap = await getDocs(queryForUser);
 
   var queryParam = "";
@@ -166,10 +186,9 @@ export async function getUserEpoch(username) {
   if (userSnap.docs[0] !== undefined) {
     oldEpoch = userSnap.docs[0].data().epoch;
   }
-  console.log(oldEpoch);
 
   if (oldEpoch !== undefined) {
-    queryParam = "?after=" + oldEpoch;
+    queryParam = "&after=" + oldEpoch;
   }
 
   await updateDoc(doc(db, "users", userSnap.docs[0].id), {
