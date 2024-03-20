@@ -1,6 +1,6 @@
 import { db } from "@/app/firebase/config"
 import { Track } from "../shared_objects/Track";
-import { collection, doc, setDoc, getDocs, query, where } from "firebase/firestore";
+import { collection, doc, setDoc, getDocs, updateDoc, query, where } from "firebase/firestore";
 
 export async function writeTracksToFirestore(user_name, tracks)
   { 
@@ -95,16 +95,41 @@ export async function readMonthTracksFromFirestore(user_name, month) {
 export async function updateTracks(spotifyTotalTracks, username)
 {
   const queryForUser = query(collection(db, "users"), where("name", "==", username));
-  const userSnap = await getDocs(queryForUser)
+  const userSnap = await getDocs(queryForUser);
 
-  const queryForExistingTracks = query(collection(db, "users", userSnap.docs[0].id, "tracks"))
-  const queryForExistingTracksSnap = await getDocs(queryForExistingTracks)
+  const queryForExistingTracks = query(collection(db, "users", userSnap.docs[0].id, "tracks"));
+  const queryForExistingTracksSnap = await getDocs(queryForExistingTracks);
 
   if(spotifyTotalTracks == queryForExistingTracksSnap.size)
   {
-    console.log("No need to write to Firestore, user's library has not changed")
+    console.log("No need to write to Firestore, user's library has not changed");
     return false; 
   }
 
   return true;
+}
+
+export async function getUserEpoch(username) {
+  const queryForUser = query(
+    collection(db, "users"),
+    where("name", "==", username),
+  );
+  const userSnap = await getDocs(queryForUser);
+
+  var queryParam = "";
+  var oldEpoch = undefined;
+  if (userSnap.docs[0] !== undefined) {
+    oldEpoch = userSnap.docs[0].data().epoch;
+  }
+  console.log(oldEpoch);
+
+  if (oldEpoch !== undefined) {
+    queryParam = "?after=" + oldEpoch;
+  }
+
+  await updateDoc(doc(db, "users", userSnap.docs[0].id), {
+    epoch: Date.now(),
+  });
+
+  return queryParam;
 }
