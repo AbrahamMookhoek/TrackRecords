@@ -35,7 +35,7 @@ const UserSignInButton = ({ type, icon, variant, session }) => {
       <button
         type={type}
         className={`flexCenter gap-3 rounded-full border ${variant}`}
-        onClick={() => signIn('spotify')}
+        onClick={() => signIn('spotify', {redirect: true, callbackUrl: `${window.location.origin}/dashboard`})}
       >
         {icon && (
           <Image src={icon} alt={"Login Button"} width={24} height={24} />

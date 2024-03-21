@@ -1,15 +1,10 @@
 import type { NextAuthOptions } from 'next-auth'
 import SpotifyProvider from 'next-auth/providers/spotify'
 
-import { app, db } from '../../../firebase/config'
+import { app } from '../../../firebase/config'
 import { FirestoreAdapter } from '@auth/firebase-adapter'
 
-import { redirect, useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
-import { getServerSession } from 'next-auth'
-
 import refreshAccessToken from '@/app/utils/spotify'
-import { spotifyGetSavedTracks } from '@/app/utils/spotify'
 
 async function refreshToken(token){
     let returnedObj = await refreshAccessToken(token.spotify_refresh_token)

@@ -1,9 +1,9 @@
 import Image from 'next/image'
 
-export default function Home() {
+export default function StatisticsPage() {
   return (
     <h1>
-      TODO: IDK
+      TODO: IMPLEMENT STATISTICS
     </h1>
   )
 }

@@ -3,8 +3,6 @@ import "./globals.css";
 import { getServerSession } from "next-auth";
 import { options } from "./api/auth/[...nextauth]/options";
 import SessionProvider from "./providers/SessionProvider";
-import Home from "./page";
-import Dashboard from "./dashboard/page";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
 import Provider from "./providers/Providers";
 
@@ -28,7 +26,7 @@ export default async function RootLayout({
         <Provider>
           <AppRouterCacheProvider>
             <SessionProvider session={session}>
-              {session ? <Dashboard /> : <Home />}
+              {children}
             </SessionProvider>
           </AppRouterCacheProvider>
         </Provider>

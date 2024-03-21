@@ -1,6 +1,10 @@
 import { create } from "zustand";
 
 export const useTrackStore = create((set) => ({
-  tracks: [],
-  setTracks: (newTracks) => set({ tracks: newTracks }),
+  addedTracks: [],
+  setAddedTracks: (newAddedTracks) => set({ addedTracks: newAddedTracks }),
+
+  listenedTracks: [],
+  setListenedTracks: (newListenedTracks) =>
+    set({ listenedTracks: newListenedTracks }),
 }));
