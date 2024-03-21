@@ -162,9 +162,7 @@ export async function writeListeningHistoryToFireStore(username,listeningHistory
   }
 }
 
-export async function readListeningHistoryFromFirestore(username) {
-  let trackMap = new Map();
-  
+export async function readListeningHistoryFromFirestore(username) { 
   const queryForUser = query(
     collection(db, "users"), where("name", "==", username));
   const userSnap = await getDocs(queryForUser);

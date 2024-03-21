@@ -29,6 +29,59 @@ export default async function refreshAccessToken(refresh_token) {
   return info;
 }
 
+export async function spotifyGetTracks(access_token, track_ids) {
+  var myHeaders = new Headers();
+  myHeaders.append("Authorization", "Bearer " + access_token);
+
+  var requestOptions = {
+    method: "GET",
+    headers: myHeaders,
+    redirect: "follow",
+  };
+
+  // below 2 variables are purely for debugging
+  var temp_tracks = [];
+
+  // get all tracks in saved library
+  await fetch("https://api.spotify.com/v1/tracks?ids="+track_ids, requestOptions)
+    .then((response) => {
+      return response.json();
+    })
+    .then((result) => {
+      var artistsNameArray = [];
+      var artistsLinkArray = [];
+
+      if (result != undefined) {
+        console.log(result);
+        result.tracks.forEach((track) => {
+          artistsNameArray = [];
+          artistsLinkArray = [];
+
+          track.artists.forEach((artist) => {
+            artistsNameArray.push(artist.name);
+            artistsLinkArray.push(artist.external_urls.spotify);
+          });
+  
+          temp_tracks.push(new Track(
+            track.uri.split(":").pop(),
+            track.album.images.length !== 0 ? track.album.images[track.album.images.length - 1].url : "Unknown",
+            track.album.name,
+            artistsNameArray,
+            artistsLinkArray,
+            track.duration_ms,
+            track.external_urls.spotify,
+            track.name,
+            [],
+            [],
+          ));
+        })
+      }
+    })
+    .catch((error) => console.log("error", error));
+
+  return temp_tracks;
+}
+
 export async function spotifyGetSavedTracks(access_token) {
   var myHeaders = new Headers();
   myHeaders.append("Authorization", "Bearer " + access_token);
@@ -69,10 +122,7 @@ export async function spotifyGetSavedTracks(access_token) {
           tracks_added.push(
             new Track(
               item.track.uri.split(":").pop(),
-              item.track.album.images.length !== 0
-                ? item.track.album.images[item.track.album.images.length - 1]
-                    .url
-                : "Unknown",
+              item.track.album.images.length !== 0 ? item.track.album.images[item.track.album.images.length - 1].url : "Unknown",
               item.track.album.name,
               artistsNameArray,
               artistsLinkArray,
@@ -116,10 +166,7 @@ export async function spotifyGetSavedTracks(access_token) {
             tracks_added.push(
               new Track(
                 item.track.uri.split(":").pop(),
-                item.track.album.images.length !== 0
-                  ? item.track.album.images[item.track.album.images.length - 1]
-                      .url
-                  : "Unknown",
+                item.track.album.images.length !== 0 ? item.track.album.images[item.track.album.images.length - 1].url : "Unknown",
                 item.track.album.name,
                 artistsNameArray,
                 artistsLinkArray,
@@ -383,34 +430,46 @@ export async function generateMasterSongList(access_token, username) {
     console.log(error);
   }
 
+  var spotify_ids = [];
+
   try {
-    listening_history.forEach((doc) => {
+    listening_history.forEach(async (doc) => {
       if(savedTracks.has(doc.id)) {
         console.log(doc.data());
         let trackObj = savedTracks.get(doc.id);
-        const docData = doc.data()
+        const docData = doc.data();
         trackObj.played_at = trackObj.played_at.concat(docData.played_at);
       }
       else {
-        // add tracks that aren't saved to the list
+        if(spotify_ids.length === 50) {
+          let id_string = spotify_ids.join(',');
+          let temp_tracks = await spotifyGetTracks(access_token, id_string);
+          
+          temp_tracks.forEach((track) => {
+            console.log("listened:"+track);
+            savedTracks.set(track.spotify_uri, track);
+          });
+          
+          spotify_ids = [];
+        }
+        else {
+          spotify_ids.push(doc.id);
+        }
       }
     })
   } catch (error) {
     console.log(error);
   }
+  
+  if(spotify_ids.length > 0) {
+    let id_string = spotify_ids.join(",");
+    let temp_tracks = await spotifyGetTracks(access_token, id_string);
 
-  // try {
-  //   playedTracks.forEach((value, key, map) => {
-  //     if (savedTracks.has(key)) {
-  //       let trackObj = savedTracks.get(key);
-  //       trackObj.played_at = value.played_at;
-  //     } else {
-  //       savedTracks.set(key, value);
-  //     }
-  //   });
-  // } catch (error) {
-  //   console.log(error);
-  // }
+    temp_tracks.forEach((track) => {
+      console.log("listened: ",track);
+      savedTracks.set(track.spotify_uri, track);
+    });
+  }
 
   return savedTracks;
 }
