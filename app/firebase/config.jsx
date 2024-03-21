@@ -8,14 +8,14 @@ import { getFirestore } from "firebase/firestore";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 // Track Records
-// const firebaseConfig = {
-//   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-//   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-//   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-//   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-//   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-//   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-// };
+const firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
 
 // Goose's Backup
 // const firebaseConfig = {
@@ -39,15 +39,15 @@ import { getFirestore } from "firebase/firestore";
 // };
 
 // AJ Backup2
-const firebaseConfig = {
-  apiKey: "AIzaSyB4vCMFa1AaXGCcQx4sgsJhSPtIXq2a8dA",
-  authDomain: "track-records-backupaj2.firebaseapp.com",
-  projectId: "track-records-backupaj2",
-  storageBucket: "track-records-backupaj2.appspot.com",
-  messagingSenderId: "766867214832",
-  appId: "1:766867214832:web:f9e07c0104d09d8cfbcd35",
-  measurementId: "G-YG8B741049",
-};
+// const firebaseConfig = {
+//   apiKey: "AIzaSyB4vCMFa1AaXGCcQx4sgsJhSPtIXq2a8dA",
+//   authDomain: "track-records-backupaj2.firebaseapp.com",
+//   projectId: "track-records-backupaj2",
+//   storageBucket: "track-records-backupaj2.appspot.com",
+//   messagingSenderId: "766867214832",
+//   appId: "1:766867214832:web:f9e07c0104d09d8cfbcd35",
+//   measurementId: "G-YG8B741049",
+// };
 
 
 // Initialize Firebase
