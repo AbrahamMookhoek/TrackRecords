@@ -1,5 +1,9 @@
 import { Track } from "../shared_objects/Track";
-import { getUserEpoch, readListeningHistoryFromFirestore, writeListeningHistoryToFireStore } from "@/app/firebase/firebase"
+import {
+  getUserEpoch,
+  readListeningHistoryFromFirestore,
+  writeListeningHistoryToFireStore,
+} from "@/app/firebase/firebase";
 
 export default async function refreshAccessToken(refresh_token) {
   var refresh_token = refresh_token;
@@ -43,7 +47,10 @@ export async function spotifyGetTracks(access_token, track_ids) {
   var temp_tracks = [];
 
   // get all tracks in saved library
-  await fetch("https://api.spotify.com/v1/tracks?ids="+track_ids, requestOptions)
+  await fetch(
+    "https://api.spotify.com/v1/tracks?ids=" + track_ids,
+    requestOptions,
+  )
     .then((response) => {
       return response.json();
     })
@@ -61,20 +68,24 @@ export async function spotifyGetTracks(access_token, track_ids) {
             artistsNameArray.push(artist.name);
             artistsLinkArray.push(artist.external_urls.spotify);
           });
-  
-          temp_tracks.push(new Track(
-            track.uri.split(":").pop(),
-            track.album.images.length !== 0 ? track.album.images[track.album.images.length - 1].url : "Unknown",
-            track.album.name,
-            artistsNameArray,
-            artistsLinkArray,
-            track.duration_ms,
-            track.external_urls.spotify,
-            track.name,
-            [],
-            [],
-          ));
-        })
+
+          temp_tracks.push(
+            new Track(
+              track.uri.split(":").pop(),
+              track.album.images.length !== 0
+                ? track.album.images[track.album.images.length - 1].url
+                : "Unknown",
+              track.album.name,
+              artistsNameArray,
+              artistsLinkArray,
+              track.duration_ms,
+              track.external_urls.spotify,
+              track.name,
+              [],
+              [],
+            ),
+          );
+        });
       }
     })
     .catch((error) => console.log("error", error));
@@ -122,7 +133,10 @@ export async function spotifyGetSavedTracks(access_token) {
           tracks_added.push(
             new Track(
               item.track.uri.split(":").pop(),
-              item.track.album.images.length !== 0 ? item.track.album.images[item.track.album.images.length - 1].url : "Unknown",
+              item.track.album.images.length !== 0
+                ? item.track.album.images[item.track.album.images.length - 1]
+                    .url
+                : "Unknown",
               item.track.album.name,
               artistsNameArray,
               artistsLinkArray,
@@ -166,7 +180,10 @@ export async function spotifyGetSavedTracks(access_token) {
             tracks_added.push(
               new Track(
                 item.track.uri.split(":").pop(),
-                item.track.album.images.length !== 0 ? item.track.album.images[item.track.album.images.length - 1].url : "Unknown",
+                item.track.album.images.length !== 0
+                  ? item.track.album.images[item.track.album.images.length - 1]
+                      .url
+                  : "Unknown",
                 item.track.album.name,
                 artistsNameArray,
                 artistsLinkArray,
@@ -225,49 +242,50 @@ export async function getRecentlyPlayed(access_token, username) {
   // TODO: We need to somehow save the Unix Epoch time and update it everytime we run this query
   //       We can save this in Firebase under the user and slap it on to the url using "before=UNIX EPOCH TIME"
   await fetch(
-    "https://api.spotify.com/v1/me/player/recently-played?limit=50"+queryParam,
+    "https://api.spotify.com/v1/me/player/recently-played?limit=50" +
+      queryParam,
     requestOptions,
   )
-  .then((response) => response.json())
-  .then((result) => {
-    if(result.items != undefined) {
-      console.log(result.items.length);
+    .then((response) => response.json())
+    .then((result) => {
+      if (result.items != undefined) {
+        console.log(result.items.length);
 
-      count += result.items.length;
-      
-      result.items.forEach((item) => {
-        artistsNameArray = [];
-        artistsLinkArray = [];
-        
-        if (item != undefined) {
-          item.track.artists.forEach((artist) => {
-            artistsNameArray.push(artist.name);
-            artistsLinkArray.push(artist.external_urls.spotify);
-          });
+        count += result.items.length;
 
-          tracks_played.push(
-            new Track(
-              item.track.uri.split(":").pop(),
-              item.track.album.images.length !== 0
-                ? item.track.album.images[item.track.album.images.length - 1]
-                    .url
-                : "Unknown",
-              item.track.album.name,
-              artistsNameArray,
-              artistsLinkArray,
-              item.track.duration_ms,
-              item.track.external_urls.spotify,
-              item.track.name,
-              [],
-              [item.played_at],
-            ),
-          );
-          count_iter += 1;
-        }
-      });
-    }
-  })
-  .catch((error) => console.log("error", error));
+        result.items.forEach((item) => {
+          artistsNameArray = [];
+          artistsLinkArray = [];
+
+          if (item != undefined) {
+            item.track.artists.forEach((artist) => {
+              artistsNameArray.push(artist.name);
+              artistsLinkArray.push(artist.external_urls.spotify);
+            });
+
+            tracks_played.push(
+              new Track(
+                item.track.uri.split(":").pop(),
+                item.track.album.images.length !== 0
+                  ? item.track.album.images[item.track.album.images.length - 1]
+                      .url
+                  : "Unknown",
+                item.track.album.name,
+                artistsNameArray,
+                artistsLinkArray,
+                item.track.duration_ms,
+                item.track.external_urls.spotify,
+                item.track.name,
+                [],
+                [item.played_at],
+              ),
+            );
+            count_iter += 1;
+          }
+        });
+      }
+    })
+    .catch((error) => console.log("error", error));
 
   const trackMap = new Map();
 
@@ -364,12 +382,15 @@ async function getAllPlaylistsAndTracks(access_token, username) {
 
 export async function generateMasterSongList(access_token, username) {
   var savedTracks = await spotifyGetSavedTracks(access_token);
-  var tracksFromPlaylists = await getAllPlaylistsAndTracks(access_token, username);
-  try{
-    await getRecentlyPlayed(access_token, username)
-  } catch (error){ console.log(error)}
+  var tracksFromPlaylists = await getAllPlaylistsAndTracks(access_token,username);
+  
+  try {
+    await getRecentlyPlayed(access_token, username);
+  } catch (error) {
+    console.log(error);
+  }
+
   const listening_history = await readListeningHistoryFromFirestore(username);
-  console.log("Listen History:", listening_history);
 
   try {
     var formattedTracksFromPlaylists = [];
@@ -386,7 +407,11 @@ export async function generateMasterSongList(access_token, username) {
 
       let trackObj = new Track(
         playlistItem.track.uri.split(":").pop(),
-        playlistItem.track.album.images.length !== 0 ? playlistItem.track.album.images[playlistItem.track.album.images.length - 1].url : "Unknown",
+        playlistItem.track.album.images.length !== 0
+          ? playlistItem.track.album.images[
+              playlistItem.track.album.images.length - 1
+            ].url
+          : "Unknown",
         playlistItem.track.album.name,
         artistsNameArray,
         artistsLinkArray,
@@ -434,39 +459,37 @@ export async function generateMasterSongList(access_token, username) {
 
   try {
     listening_history.forEach(async (doc) => {
-      if(savedTracks.has(doc.id)) {
+      if (savedTracks.has(doc.id)) {
         console.log(doc.data());
         let trackObj = savedTracks.get(doc.id);
         const docData = doc.data();
         trackObj.played_at = trackObj.played_at.concat(docData.played_at);
-      }
-      else {
-        if(spotify_ids.length === 50) {
-          let id_string = spotify_ids.join(',');
+      } else {
+        if (spotify_ids.length === 50) {
+          let id_string = spotify_ids.join(",");
           let temp_tracks = await spotifyGetTracks(access_token, id_string);
-          
+
           temp_tracks.forEach((track) => {
-            console.log("listened:"+track);
+            console.log("listened:" + track);
             savedTracks.set(track.spotify_uri, track);
           });
-          
+
           spotify_ids = [];
-        }
-        else {
+        } else {
           spotify_ids.push(doc.id);
         }
       }
-    })
+    });
   } catch (error) {
     console.log(error);
   }
-  
-  if(spotify_ids.length > 0) {
+
+  if (spotify_ids.length > 0) {
     let id_string = spotify_ids.join(",");
     let temp_tracks = await spotifyGetTracks(access_token, id_string);
 
     temp_tracks.forEach((track) => {
-      console.log("listened: ",track);
+      console.log("listened: ", track);
       savedTracks.set(track.spotify_uri, track);
     });
   }
