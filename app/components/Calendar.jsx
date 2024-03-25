@@ -6,27 +6,29 @@ import interactionPlugin from "@fullcalendar/interaction";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import { useCalendarStore } from "../store/calendarStore";
 import { useTrackStore } from "../store/trackStore";
-import { IconButton } from "@mui/material";
-import Snackbar from "@mui/material/Snackbar";
-import CloseIcon from "@mui/icons-material/Close";
 
 import { useQuery } from "@tanstack/react-query";
 import { createCalendarEvents, generateMasterSongList } from "../utils/spotify";
 import PlaylistFilter from "./PlaylistFilter";
+import QuerySnackbar from "./QuerySnackbar";
+
+const myCustomButton = {
+  text: "custom!",
+  click: function () {
+    alert("clicked the custom button!");
+  },
+};
+
+// Check if key exists in localStorage
+const isKeyExists = (key) => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem(key) !== null;
+  }
+  return false;
+};
 
 export default function Calendar({ user }) {
   const calendarRef = useRef(null);
-  const [open, setOpen] = useState(true);
-
-  const handleClose = (
-    event: React.SyntheticEvent | Event,
-    reason?: string,
-  ) => {
-    if (reason === "clickaway") {
-      return;
-    }
-    setOpen(false);
-  };
 
   const { events, setEvents } = useCalendarStore();
   const { isEventSelected, setEventSelected } = useCalendarStore();
@@ -37,6 +39,9 @@ export default function Calendar({ user }) {
   const setAddedTracks = useTrackStore((state) => state.setAddedTracks);
   const listenedTracks = useTrackStore((state) => state.listenedTracks);
   const setListenedTracks = useTrackStore((state) => state.setListenedTracks);
+
+  const [showSnackbar, setShowSnackbar] = useState(false);
+  const [queryMessage, setQueryMessage] = useState("")
 
   const dayClicked = (info) => {
     // If the user clicked on an Event, then we know events are in that day
@@ -93,22 +98,52 @@ export default function Calendar({ user }) {
   };
 
   // code to fetch data
-  const { status, data, error, isLoading } = useQuery({
+  const { status, data } = useQuery({
     queryKey: ["tracks"],
     queryFn: () => generateMasterSongList(user.spotify_access_token, user.name),
     notifyOnChangeProps: ["data", "status"],
     refetchOnWindowFocus: false,
+    enabled: !isKeyExists("tracks")
   });
 
   useEffect(() => {
-    if (status == "success") {
-      // console.log("Master Song List", data);
+    // Check if key "tracks" doesn't exist in localStorage
+    if (!isKeyExists("tracks") && status === "success") {
+      // Run this block only if the key doesn't exist in localStorage
       let temp = createCalendarEvents(data);
       setAddedTracks(temp[0]);
       setListenedTracks(temp[1]);
       setEvents(temp[2]);
+
+      // Serialize the map to JSON
+      const serializedMap = JSON.stringify([...data]);
+
+      // Store the serialized map in localStorage
+      localStorage.setItem('tracks', serializedMap);
+      setQueryMessage("Tracks queried...")
+      setShowSnackbar(true);
+    }
+    
+    // Check to see if key "tracks" exists in localStorage, if so then retreive from localStorage
+    if(isKeyExists("tracks")){
+      setQueryMessage("Tracks already retreived, pulling from storage...")
+      setShowSnackbar(true);
+      // Retrieve the serialized map from localStorage
+      const storedMap = localStorage.getItem('tracks');
+
+      // Deserialize the stored map
+      const deserializedMap = new Map(JSON.parse(storedMap));
+
+      let temp = createCalendarEvents(deserializedMap)
+      setAddedTracks(temp[0])
+      setListenedTracks(temp[1])
+      setEvents(temp[2])
     }
   }, [data]);
+
+  const handleCloseSnackbar = () => {
+    setShowSnackbar(false);
+  };
 
   return (
     <div className="relative col-span-5 mr-32 rounded-lg bg-light_blue-100 p-2 text-black shadow-lg">
@@ -147,6 +182,11 @@ export default function Calendar({ user }) {
             </IconButton>
           </React.Fragment>
         }
+      />
+      <QuerySnackbar
+        open={showSnackbar}
+        message={queryMessage}
+        handleClose={handleCloseSnackbar}
       />
     </div>
   );
