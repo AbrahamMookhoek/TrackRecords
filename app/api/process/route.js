@@ -58,7 +58,7 @@ export async function POST(request, response) {
             trackMap.set(obj.spotify_track_uri.split(":").pop(), {
               name: obj.master_metadata_track_name,
               count: 1,
-              played_at: [obj.ts]
+              played_at: [obj.ts.split("T")[0]]
             });
           } else {
             let tempObj = trackMap.get(obj.spotify_track_uri.split(":").pop());
