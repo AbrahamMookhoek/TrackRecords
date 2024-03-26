@@ -579,8 +579,5 @@ export function createCalendarEvents(tracks) {
     events.push(currTrack);
   });
 
-  console.log("addedTracksByDay", addedTracksByDay);
-  console.log("listenedTracksByDay", listenedTracksByDay);
-
   return [addedTracksByDay, listenedTracksByDay, events];
 }
