@@ -1,9 +1,5 @@
-import Image from 'next/image'
+import Image from "next/image";
 
 export default function StatisticsPage() {
-  return (
-    <h1>
-      TODO: IMPLEMENT STATISTICS
-    </h1>
-  )
+  return <h1>TODO: IMPLEMENT STATISTICS</h1>;
 }
