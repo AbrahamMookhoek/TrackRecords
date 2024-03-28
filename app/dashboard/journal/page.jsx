@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 import { options } from "@/app/api/auth/[...nextauth]/options";
 import TextEditor from "@/app/components/TextEditor";
 import ListeningHistory from "@/app/components/ListeningHistory";
+import JournalEntryList from "@/app/components/JournalEntryList";
 
 export default async function JournalPage() {
   const session = await getServerSession(options);
@@ -16,7 +17,8 @@ export default async function JournalPage() {
         }
       />
       <div className="col-span-full row-span-10 grid grid-cols-subgrid gap-x-2">
-        <ListeningHistory /> {/*This is what you would need to implement for the sidebar */}
+        <JournalEntryList />{" "}
+        {/*This is what you would need to implement for the sidebar */}
         <TextEditor user={session.user} />
       </div>
       <Footer className={"flexCenter col-span-full row-span-1 w-full px-32"} />
