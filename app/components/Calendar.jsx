@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useEffect, useRef, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -18,7 +18,7 @@ const myCustomButton = {
 
 // Check if key exists in localStorage
 const isKeyExists = (key) => {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     return localStorage.getItem(key) !== null;
   }
   return false;
@@ -61,6 +61,9 @@ export default function Calendar({ user }) {
 
       setAddedTracksOnDate(filteredAddedTracksByDay);
       setListenedTracksOnDate(filteredListenedTracksByDay);
+      console.log(info?.event?.startStr);
+      console.log("added tracks: " + filteredAddedTracksByDay);
+      console.log("listened tracks: " + filteredListenedTracksByDay);
     }
     // This means the user clicked on a day
     else {
@@ -101,7 +104,7 @@ export default function Calendar({ user }) {
     queryFn: () => generateMasterSongList(user.spotify_access_token, user.name),
     notifyOnChangeProps: ["data", "status"],
     refetchOnWindowFocus: false,
-    enabled: !isKeyExists("tracks")
+    enabled: !isKeyExists("tracks"),
   });
 
   useEffect(() => {
@@ -117,18 +120,18 @@ export default function Calendar({ user }) {
       const serializedMap = JSON.stringify([...data]);
 
       // Store the serialized map in localStorage
-      localStorage.setItem('tracks', serializedMap);
+      localStorage.setItem("tracks", serializedMap);
       setQueryMessage("Tracks queried...");
       setShowSnackbar(true);
       setDataLoaded(true); // Mark data loading as complete
     }
-    
+
     // Check to see if key "tracks" exists in localStorage, if so then retrieve from localStorage
-    if(isKeyExists("tracks")){
+    if (isKeyExists("tracks")) {
       setQueryMessage("Tracks already retrieved, pulling from storage...");
       setShowSnackbar(true);
       // Retrieve the serialized map from localStorage
-      const storedMap = localStorage.getItem('tracks');
+      const storedMap = localStorage.getItem("tracks");
 
       // Deserialize the stored map
       const deserializedMap = new Map(JSON.parse(storedMap));
@@ -152,8 +155,12 @@ export default function Calendar({ user }) {
         <div className="col-span-5 mr-32 rounded-lg bg-light_blue-100 p-2 text-black shadow-lg">
           <FullCalendar
             ref={calendarRef}
-            eventDidMount={() => {console.log("Events Mounted")}}
-            eventWillUnmount={() => {console.log("Events UNMOUNTED")}}
+            eventDidMount={() => {
+              console.log("Events Mounted");
+            }}
+            eventWillUnmount={() => {
+              console.log("Events UNMOUNTED");
+            }}
             events={events}
             eventClick={dayClicked}
             plugins={[dayGridPlugin, interactionPlugin]}
@@ -162,7 +169,11 @@ export default function Calendar({ user }) {
             height={"100%"}
             dateClick={dayClicked}
             customButtons={{ myCustomButton }}
-            headerToolbar={{ left: "title", center: "myCustomButton", right: "prev,next" }}
+            headerToolbar={{
+              left: "title",
+              center: "myCustomButton",
+              right: "prev,next",
+            }}
           />
           {/* Render the Snackbar */}
           <QuerySnackbar
