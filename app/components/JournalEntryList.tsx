@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import List from "@mui/material/List";
@@ -30,6 +30,8 @@ export default function () {
   const { addedTracksOnDate } = useCalendarStore();
   const { listenedTracksOnDate } = useCalendarStore();
   const { dateSelected } = useCalendarStore();
+
+  const addEntry = (newEntry) => {};
 
   return (
     <div className="col-span-2 ml-32 mr-1 flex flex-col overflow-auto rounded-lg bg-light_blue-100 text-black shadow-lg">

@@ -159,7 +159,7 @@ export async function spotifyGetSavedTracks(access_token) {
     })
     .catch((error) => console.log("error", error));
 
-  while (nextSongBatchLink != null) {
+  while (nextSongBatchLink) {
     await fetch(nextSongBatchLink, requestOptions)
       .then((response) => response.json())
       .then((result) => {

@@ -2,14 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import Trix from "./Trix";
-import { EditText } from "react-edit-text";
-import { Track } from "../shared_objects/Track";
 import { Entry } from "../shared_objects/Entry";
 import QuerySnackbar from "./QuerySnackbar";
 import { useQuery } from "@tanstack/react-query";
 import { createCalendarEvents, generateMasterSongList } from "../utils/spotify";
 import { Select, SelectChangeEvent } from "@mui/material";
 import { MenuItem } from "@mui/material";
+import { TextField } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -28,9 +27,13 @@ const isKeyExists = (key) => {
   return false;
 };
 
+const newEntry = new Entry();
+newEntry.title = "New Entry";
+newEntry.content = "";
+newEntry.date = dayjs();
+
 //once entries are added to db, text editor should be updated to show content when a specific entry is selected
 export default function TextEditor({ user }) {
-  const [value, setValue] = useState("");
   const [showSnackbar, setShowSnackbar] = useState(false);
   const [queryMessage, setQueryMessage] = useState("");
   const [dataLoaded, setDataLoaded] = useState(false); // State to track if data loading is complete
@@ -43,10 +46,11 @@ export default function TextEditor({ user }) {
 
   const [track_list, setTrackList] = useState([]);
 
-  const entry = new Entry();
-  entry.title = "New Entry";
-  entry.content = "";
-  entry.date = dayjs();
+  const [entry, setEntry] = useState(newEntry);
+  const [title, setTitle] = useState(entry.title);
+  const [date, setDate] = useState(entry.date);
+  const [track, setTrack] = useState(entry.track);
+  const [content, setContent] = useState(entry.content);
 
   // code to fetch data
   const { status, data } = useQuery({
@@ -98,11 +102,6 @@ export default function TextEditor({ user }) {
     setShowSnackbar(false);
   };
 
-  const handleSelectChange = (event) => {
-    //update track card to show current selected track
-    console.log(event.target.value);
-  };
-
   const updateTrackList = (selectedDate) => {
     console.log(selectedDate);
     console.log("added tracks: " + addedTracks);
@@ -131,21 +130,43 @@ export default function TextEditor({ user }) {
     console.log(track_list);
   };
 
+  const onTitleChange = (updatedTitle) => {
+    setTitle(updatedTitle);
+  };
+
+  const onTrackChange = (updatedTrack) => {
+    //update track for current entry
+    console.log(updatedTrack.target.value);
+    setTrack(updatedTrack.target.value);
+  };
+
+  const onDateChange = (updatedDate) => {
+    setDate(updatedDate);
+  };
+
+  const onEditorChange = (updatedContent) => {
+    //setContent(updatedContent);
+  };
+
   const saveEntry = () => {
-    //take all info in editor and push to database
-    //idk update the sidelist?
+    const updatedEntry = new Entry(title, track, date, content);
+    setEntry(updatedEntry);
+
+    //send entry to side list
+
     setQueryMessage("Saved!");
     setShowSnackbar(true);
   };
 
-  //get current day to set as default for date picker
-  const date = dayjs();
+  const updateEntry = (updatedEntry) => {
+    setEntry(updatedEntry);
+  };
 
   //all the content is just slapped in here, needs to be reorganized at some point
   return (
     <div className="col-span-5 mr-32 rounded-lg bg-light_blue-100 p-2 text-black shadow-lg">
       <div className="flex items-start md:flex-row">
-        <EditText defaultValue={entry.title} showEditButton />
+        <TextField defaultValue={entry.title} />
         <Button
           onClick={() => {
             saveEntry();
@@ -165,7 +186,7 @@ export default function TextEditor({ user }) {
           <Select
             labelId="track-select-label"
             label="Track"
-            onChange={handleSelectChange}
+            onChange={onTrackChange}
           >
             {track_list.length > 0 &&
               track_list.map((track) => (
@@ -192,10 +213,7 @@ export default function TextEditor({ user }) {
           }
         </LocalizationProvider>
       </div>
-      <Trix
-        defaultValue={entry.content}
-        onChange={(e, newValue) => setValue(newValue)}
-      />
+      <Trix defaultValue={entry.content} onChange={onEditorChange()} />
       <QuerySnackbar
         open={showSnackbar}
         message={queryMessage}
