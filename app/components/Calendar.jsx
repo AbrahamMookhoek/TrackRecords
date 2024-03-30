@@ -58,12 +58,14 @@ export default function Calendar({ user }) {
       )
         .values()
         .next().value;
-
+      ``;
       setAddedTracksOnDate(filteredAddedTracksByDay);
       setListenedTracksOnDate(filteredListenedTracksByDay);
       console.log(info?.event?.startStr);
-      console.log("added tracks: " + filteredAddedTracksByDay);
-      console.log("listened tracks: " + filteredListenedTracksByDay);
+      console.log("added tracks: " + addedTracks);
+      console.log("listened tracks: " + listenedTracks);
+      console.log("filtered added tracks: " + filteredAddedTracksByDay);
+      console.log("filtered listened tracks: " + filteredListenedTracksByDay);
     }
     // This means the user clicked on a day
     else {
