@@ -1,6 +1,9 @@
 "use client";
 
 export default function ({ track, added = true, allowLink = true }) {
+  if (track === undefined) {
+    return;
+  }
   function convertTimestamp(timestamp) {
     const date = new Date(timestamp);
     const hours = date.getHours();

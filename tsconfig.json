@@ -31,6 +31,7 @@
     "app/dashboard/layout.jsx",
     "app/components/Calendar.jsx",
     "app/components/TextEditor.jsx",
+    "app/components/JournalEntryList.jsx",
   ],
   "exclude": ["node_modules"],
 }

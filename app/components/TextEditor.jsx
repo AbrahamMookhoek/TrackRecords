@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Trix from "./Trix";
 import { Entry } from "../shared_objects/Entry";
+import { Track } from "../shared_objects/Track";
 import QuerySnackbar from "./QuerySnackbar";
 import { useQuery } from "@tanstack/react-query";
 import { createCalendarEvents, generateMasterSongList } from "../utils/spotify";
@@ -17,6 +18,7 @@ import { InputLabel } from "@mui/material";
 import dayjs from "dayjs";
 import TrackCard from "./TrackCard";
 import { useTrackStore } from "../store/trackStore";
+import { useEntryStore } from "../store/entryStore";
 import {} from "../utils/spotify";
 
 // Check if key exists in localStorage
@@ -44,6 +46,9 @@ export default function TextEditor({ user }) {
   const listenedTracks = useTrackStore((state) => state.listenedTracks);
   const setListenedTracks = useTrackStore((state) => state.setListenedTracks);
 
+  const entries = useEntryStore((state) => state.entries);
+  const addEntry = useEntryStore((state) => state.addEntry);
+
   const [track_list, setTrackList] = useState([]);
 
   const [entry, setEntry] = useState(newEntry);
@@ -51,6 +56,7 @@ export default function TextEditor({ user }) {
   const [date, setDate] = useState(entry.date);
   const [track, setTrack] = useState(entry.track);
   const [content, setContent] = useState(entry.content);
+  const setUpdateFunc = useEntryStore((state) => state.setUpdateFunc);
 
   // code to fetch data
   const { status, data } = useQuery({
@@ -62,6 +68,13 @@ export default function TextEditor({ user }) {
   });
 
   useEffect(() => {
+    setUpdateFunc(updateEntry);
+    //this may not need to be here
+    const editor = document.querySelector("trix-editor");
+    if (editor) {
+      editor.editor.loadHTML("");
+    }
+
     // Check if key "tracks" doesn't exist in localStorage
     if (!isKeyExists("tracks") && status === "success") {
       // Run this block only if the key doesn't exist in localStorage
@@ -103,9 +116,9 @@ export default function TextEditor({ user }) {
   };
 
   const updateTrackList = (selectedDate) => {
-    console.log(selectedDate);
-    console.log("added tracks: " + addedTracks);
-    console.log("listened tracks: " + listenedTracks);
+    onDateChange(selectedDate);
+    selectedDate = selectedDate.format("YYYY-MM-DD").toString();
+    console.log(listenedTracks);
     const filteredAddedTracksByDay = new Map(
       [...addedTracks].filter(([k, v]) => k === selectedDate),
     )
@@ -117,8 +130,6 @@ export default function TextEditor({ user }) {
     )
       .values()
       .next().value;
-    console.log("filtered added tracks: " + filteredAddedTracksByDay);
-    console.log("filtered listened tracks: " + filteredListenedTracksByDay);
 
     //update select list to show tracks from currently selected day
     setTrackList(
@@ -131,11 +142,10 @@ export default function TextEditor({ user }) {
   };
 
   const onTitleChange = (updatedTitle) => {
-    setTitle(updatedTitle);
+    setTitle(updatedTitle.target.value);
   };
 
   const onTrackChange = (updatedTrack) => {
-    //update track for current entry
     console.log(updatedTrack.target.value);
     setTrack(updatedTrack.target.value);
   };
@@ -145,28 +155,48 @@ export default function TextEditor({ user }) {
   };
 
   const onEditorChange = (updatedContent) => {
-    //setContent(updatedContent);
+    //console.log(updatedContent.target.value);
+    setContent(updatedContent.target.value);
   };
 
   const saveEntry = () => {
     const updatedEntry = new Entry(title, track, date, content);
-    setEntry(updatedEntry);
 
-    //send entry to side list
+    // check if entry has same date as other entries?
+    addEntry(updatedEntry);
 
     setQueryMessage("Saved!");
     setShowSnackbar(true);
   };
 
   const updateEntry = (updatedEntry) => {
-    setEntry(updatedEntry);
+    //setActiveEntry(updatedEntry);
+    setTitle(updatedEntry.title);
+    setDate(updatedEntry.date);
+    console.log("track list:");
+    console.log(track_list);
+    console.log(updatedEntry.date);
+    updateTrackList(updatedEntry.date);
+    //setTrackList([updatedEntry.track]);
+    console.log(track_list);
+    // setTrackList(track_list.concat(updatedEntry.track));
+    setTrack(updatedEntry.track);
+    //make select component display selected track
+    const editor = document.querySelector("trix-editor");
+    if (editor) {
+      editor.editor.loadHTML(updatedEntry.content);
+    }
+    console.log(updatedEntry.track);
   };
 
   //all the content is just slapped in here, needs to be reorganized at some point
   return (
     <div className="col-span-5 mr-32 rounded-lg bg-light_blue-100 p-2 text-black shadow-lg">
       <div className="flex items-start md:flex-row">
-        <TextField defaultValue={entry.title} />
+        <TextField
+          value={title}
+          onChange={(NewValue) => onTitleChange(NewValue)}
+        />
         <Button
           onClick={() => {
             saveEntry();
@@ -186,11 +216,12 @@ export default function TextEditor({ user }) {
           <Select
             labelId="track-select-label"
             label="Track"
-            onChange={onTrackChange}
+            value={track}
+            onChange={(NewValue) => onTrackChange(NewValue)}
           >
             {track_list.length > 0 &&
               track_list.map((track) => (
-                <MenuItem key={track.id} value={track.track_name}>
+                <MenuItem value={track}>
                   {
                     <TrackCard
                       track={track}
@@ -205,15 +236,23 @@ export default function TextEditor({ user }) {
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           {
             <DatePicker
-              defaultValue={entry.date}
-              onChange={(NewValue) =>
-                updateTrackList(NewValue.format("YYYY-MM-DD").toString())
-              }
+              value={date}
+              onChange={(NewValue) => updateTrackList(NewValue)}
             />
           }
         </LocalizationProvider>
       </div>
-      <Trix defaultValue={entry.content} onChange={onEditorChange()} />
+      <input
+        id="x"
+        value="<div>Editor content goes here</div>"
+        type="hidden"
+        name="content"
+      ></input>
+      <Trix
+        input="x"
+        defaultValue=""
+        onChange={(NewValue) => onEditorChange(NewValue)}
+      />
       <QuerySnackbar
         open={showSnackbar}
         message={queryMessage}

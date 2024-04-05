@@ -1,37 +1,23 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Button } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
+import { ListItemButton } from "@mui/material";
+import { Divider } from "@mui/material";
 import EntryCard from "./EntryCard";
-import { useCalendarStore } from "../store/calendarStore";
-
-import { Track } from "../shared_objects/Track";
-import { Entry } from "../shared_objects/Entry";
-import dayjs from "dayjs";
-
-//example data for entry list
-const track1 = new Track();
-const track2 = new Track();
-track1.track_name = "track 1";
-track2.track_name = "track 2";
-track1.artist_names = "artist 1";
-track2.artist_names = "artist 2";
-
-const entry1 = new Entry("title 1", track1, dayjs("2024-03-27"), "entry 1");
-const entry2 = new Entry("title 2", track2, dayjs("2024-03-26"), "entry 2");
-
-const entryList = [entry1, entry2];
+import { useEntryStore } from "../store/entryStore";
 
 export default function () {
-  const { isEventSelected, setEventSelected } = useCalendarStore();
-  const { addedTracksOnDate } = useCalendarStore();
-  const { listenedTracksOnDate } = useCalendarStore();
-  const { dateSelected } = useCalendarStore();
+  const { entries, callUpdateFunc } = useEntryStore();
 
-  const addEntry = (newEntry) => {};
+  const handleListItemClick = (entry) => {
+    //update editor with selected entry content
+    console.log("setting active entry");
+    console.log(entry);
+    callUpdateFunc(entry);
+  };
 
   return (
     <div className="col-span-2 ml-32 mr-1 flex flex-col overflow-auto rounded-lg bg-light_blue-100 text-black shadow-lg">
@@ -41,13 +27,17 @@ export default function () {
       <div className="flex max-h-min flex-col overflow-auto">
         {
           <List>
-            {entryList.map((entry) => {
+            {entries.map((entry) => {
               return (
                 //change key here if entry is given an actual id
-                <ListItem key={entry.date}>
+                <ListItemButton
+                  key={entry.date}
+                  onClick={() => handleListItemClick(entry)}
+                >
                   <h1 className="text-2xl" defaultValue={entry.title} />
                   <EntryCard entry={entry} />
-                </ListItem>
+                  <Divider />
+                </ListItemButton>
               );
             })}
           </List>
