@@ -47,7 +47,7 @@ export default function TextEditor({ user }) {
   const setListenedTracks = useTrackStore((state) => state.setListenedTracks);
 
   const entries = useEntryStore((state) => state.entries);
-  const addEntry = useEntryStore((state) => state.addEntry);
+  const setEntries = useEntryStore((state) => state.setEntries);
 
   const [track_list, setTrackList] = useState([]);
 
@@ -57,6 +57,7 @@ export default function TextEditor({ user }) {
   const [track, setTrack] = useState(entry.track);
   const [content, setContent] = useState(entry.content);
   const setUpdateFunc = useEntryStore((state) => state.setUpdateFunc);
+  const callAddEntryFunc = useEntryStore((state) => state.callAddEntryFunc);
 
   // code to fetch data
   const { status, data } = useQuery({
@@ -146,7 +147,7 @@ export default function TextEditor({ user }) {
   };
 
   const onTrackChange = (updatedTrack) => {
-    console.log(updatedTrack.target.value);
+    //console.log(updatedTrack.target.value);
     setTrack(updatedTrack.target.value);
   };
 
@@ -162,8 +163,29 @@ export default function TextEditor({ user }) {
   const saveEntry = () => {
     const updatedEntry = new Entry(title, track, date, content);
 
-    // check if entry has same date as other entries?
-    addEntry(updatedEntry);
+    // check if entry has same date as other entries
+    const newEntries = [];
+    let added = false;
+    for (let i = 0; i < entries.length; i++) {
+      if (
+        entries[i].date.format("YYYY-MM-DD").toString() ===
+        updatedEntry.date.format("YYYY-MM-DD").toString()
+      ) {
+        newEntries.unshift(updatedEntry);
+        added = true;
+      } else {
+        newEntries.unshift(entries[i]);
+      }
+    }
+    if (!added) {
+      newEntries.unshift(updatedEntry);
+    }
+    setEntries(newEntries);
+
+    //save entries to db here?
+
+    // console.log(entries);
+    // console.log(newEntries);
 
     setQueryMessage("Saved!");
     setShowSnackbar(true);
