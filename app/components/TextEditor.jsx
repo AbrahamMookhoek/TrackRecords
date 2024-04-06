@@ -40,6 +40,7 @@ export default function TextEditor({ user }) {
   const [queryMessage, setQueryMessage] = useState("");
   const [dataLoaded, setDataLoaded] = useState(false); // State to track if data loading is complete
   const [tracks, setTracks] = useState([]);
+  const [allowChange, setAllowChange] = useState(true);
 
   const addedTracks = useTrackStore((state) => state.addedTracks);
   const setAddedTracks = useTrackStore((state) => state.setAddedTracks);
@@ -195,15 +196,23 @@ export default function TextEditor({ user }) {
     //setActiveEntry(updatedEntry);
     setTitle(updatedEntry.title);
     setDate(updatedEntry.date);
+
     console.log("track list:");
     console.log(track_list);
     console.log(updatedEntry.date);
+
     updateTrackList(updatedEntry.date);
     //setTrackList([updatedEntry.track]);
     console.log(track_list);
     // setTrackList(track_list.concat(updatedEntry.track));
     setTrack(updatedEntry.track);
     //make select component display selected track
+
+    //potential fix: on update entry, remove select and disable date picker and add fixed entry card
+    //make visible "CHANGE" button
+    //on press, change button dissappears, date picker enables, entry card replaced with select list
+    setAllowChange(false);
+
     const editor = document.querySelector("trix-editor");
     if (editor) {
       editor.editor.loadHTML(updatedEntry.content);
@@ -234,32 +243,62 @@ export default function TextEditor({ user }) {
       </div>
       <div className="flex items-start md:flex-row">
         <div>
-          <InputLabel id="track-select-label">Track</InputLabel>
-          <Select
-            labelId="track-select-label"
-            label="Track"
-            value={track}
-            onChange={(NewValue) => onTrackChange(NewValue)}
-          >
-            {track_list.length > 0 &&
-              track_list.map((track) => (
-                <MenuItem value={track}>
-                  {
-                    <TrackCard
-                      track={track}
-                      added={track.playlists_added_to !== undefined}
-                      allowLink={false}
-                    />
-                  }
-                </MenuItem>
-              ))}
-          </Select>
+          {allowChange && (
+            <div>
+              <InputLabel id="track-select-label" isactive={allowChange}>
+                Track
+              </InputLabel>
+              <Select
+                labelId="track-select-label"
+                label="Track"
+                value={track}
+                isactive={allowChange}
+                onChange={(NewValue) => onTrackChange(NewValue)}
+              >
+                {track_list.length > 0 &&
+                  track_list.map((track) => (
+                    <MenuItem value={track}>
+                      {
+                        <TrackCard
+                          track={track}
+                          added={track.playlists_added_to !== undefined}
+                          allowLink={false}
+                        />
+                      }
+                    </MenuItem>
+                  ))}
+              </Select>
+            </div>
+          )}
+          {!allowChange && track && (
+            <div className="flex items-start md:flex-row">
+              <TrackCard
+                track={track}
+                added={track.playlists_added_to !== undefined}
+                allowLink={false}
+              />
+              <Button
+                onClick={() => {
+                  setAllowChange(true);
+                  updateTrackList(date);
+                }}
+                variant="contained"
+                color="success"
+                style={{ margin: "10px" }}
+              >
+                {" "}
+                {/* Added padding style to the Button */}
+                Change
+              </Button>
+            </div>
+          )}
         </div>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           {
             <DatePicker
               value={date}
               onChange={(NewValue) => updateTrackList(NewValue)}
+              disabled={!allowChange}
             />
           }
         </LocalizationProvider>
