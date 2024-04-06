@@ -270,13 +270,15 @@ export default function TextEditor({ user }) {
               </Select>
             </div>
           )}
-          {!allowChange && track && (
+          {!allowChange && (
             <div className="flex items-start md:flex-row">
-              <TrackCard
-                track={track}
-                added={track.playlists_added_to !== undefined}
-                allowLink={false}
-              />
+              {track && (
+                <TrackCard
+                  track={track}
+                  added={track.playlists_added_to !== undefined}
+                  allowLink={false}
+                />
+              )}
               <Button
                 onClick={() => {
                   setAllowChange(true);
