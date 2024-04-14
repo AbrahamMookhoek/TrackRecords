@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import List from "@mui/material/List";
@@ -10,9 +10,45 @@ import EntryCard from "./EntryCard";
 import { useEntryStore } from "../store/entryStore";
 import { Entry } from "../shared_objects/Entry";
 import dayjs from "dayjs";
+import { useTrackStore } from "../store/trackStore";
 
-export default function () {
-  const { callUpdateFunc, entries } = useEntryStore();
+export default function JournalEntryList({ firebase_entries }) {
+  console.log("outside func:",firebase_entries);
+  const addedTracks = useTrackStore((state) => state.addedTracks);
+  const listenedTracks = useTrackStore((state) => state.listenedTracks);
+
+  var entries_array = [];
+
+  firebase_entries.forEach((value, key) => {
+    var track_obj;
+
+    addedTracks.forEach((date_value, date_key) => {
+      date_value.forEach((track) => {
+        if (track.spotify_uri === value.track) {
+          track_obj = track;
+        }
+      })
+    });
+    listenedTracks.forEach((date_value, date_key) => {
+      date_value.forEach((track) => {
+        if (track.spotify_uri === value.track) {
+          track_obj = track;
+        }
+      });
+    });
+
+    var customParseFormat = require("dayjs/plugin/customParseFormat");
+    dayjs.extend(customParseFormat);
+    console.log("!!!HERE!!!",track_obj);
+
+    entries_array.push(new Entry(value.title, track_obj, dayjs(value.date, "YYYY-MM-DD"), value.content));
+  });
+
+  const { callUpdateFunc, entries, setEntries } = useEntryStore();
+
+  useEffect(() => {
+    setEntries(entries_array);
+  }, []);
 
   const handleListItemClick = (entry) => {
     console.log("setting active entry");
@@ -21,7 +57,7 @@ export default function () {
   };
 
   const newEntry = () => {
-    const newEntry = new Entry("New Entry", null, dayjs(), "");
+    const newEntry = new Entry("New Entry", null, dayjs().format("YYYY-MM-DD").toString(), "");
     callUpdateFunc(newEntry);
   };
 

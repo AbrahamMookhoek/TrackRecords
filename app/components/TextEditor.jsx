@@ -20,6 +20,7 @@ import TrackCard from "./TrackCard";
 import { useTrackStore } from "../store/trackStore";
 import { useEntryStore } from "../store/entryStore";
 import {} from "../utils/spotify";
+import { writeEntryToFireStore } from "../firebase/firebase";
 
 // Check if key exists in localStorage
 const isKeyExists = (key) => {
@@ -161,17 +162,14 @@ export default function TextEditor({ user }) {
     setContent(updatedContent.target.value);
   };
 
-  const saveEntry = () => {
+  const saveEntry = async () => {
     const updatedEntry = new Entry(title, track, date, content);
 
     // check if entry has same date as other entries
     const newEntries = [];
     let added = false;
     for (let i = 0; i < entries.length; i++) {
-      if (
-        entries[i].date.format("YYYY-MM-DD").toString() ===
-        updatedEntry.date.format("YYYY-MM-DD").toString()
-      ) {
+      if (entries[i].date.format("YYYY-MM-DD").toString() === updatedEntry.date.format("YYYY-MM-DD").toString()) {
         newEntries.unshift(updatedEntry);
         added = true;
       } else {
@@ -183,7 +181,8 @@ export default function TextEditor({ user }) {
     }
     setEntries(newEntries);
 
-    //save entries to db here?
+    //save entry to firebase
+    await writeEntryToFireStore(user.name, updatedEntry);
 
     // console.log(entries);
     // console.log(newEntries);
