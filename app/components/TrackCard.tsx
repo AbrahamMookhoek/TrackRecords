@@ -1,6 +1,9 @@
 "use client";
 
-export default function ({ track, added }) {
+export default function ({ track, added = true, allowLink = true }) {
+  if (track === undefined) {
+    return;
+  }
   function convertTimestamp(timestamp) {
     const date = new Date(timestamp);
     const hours = date.getHours();
@@ -15,7 +18,7 @@ export default function ({ track, added }) {
     return (
       <div className="flex w-full flex-col">
         <a
-          href={track.track_link}
+          {...(allowLink ? { href: track.track_link } : {})}
           target="_blank"
           className="flex flex-col items-center rounded-lg border border-gray-200 bg-white shadow hover:bg-gray-100 md:max-w-xl md:flex-row dark:border-gray-700 dark:bg-green-700 dark:hover:bg-gray-700"
         >
@@ -48,7 +51,7 @@ export default function ({ track, added }) {
     return (
       <div className="flex w-full flex-col">
         <a
-          href={track.track_link}
+          {...(allowLink ? { href: track.track_link } : {})}
           target="_blank"
           className="flex flex-col items-center rounded-lg border border-gray-200 bg-white shadow hover:bg-gray-100 md:max-w-xl md:flex-row dark:border-gray-700 dark:bg-purple-700 dark:hover:bg-gray-700"
         >

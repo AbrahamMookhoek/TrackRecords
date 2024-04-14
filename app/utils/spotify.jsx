@@ -59,7 +59,6 @@ export async function spotifyGetTracks(access_token, track_ids) {
       var artistsLinkArray = [];
 
       if (result != undefined) {
-        console.log(result);
         result.tracks.forEach((track) => {
           artistsNameArray = [];
           artistsLinkArray = [];
@@ -160,7 +159,7 @@ export async function spotifyGetSavedTracks(access_token) {
     })
     .catch((error) => console.log("error", error));
 
-  while (nextSongBatchLink != null) {
+  while (nextSongBatchLink) {
     await fetch(nextSongBatchLink, requestOptions)
       .then((response) => response.json())
       .then((result) => {
@@ -235,7 +234,6 @@ export async function getRecentlyPlayed(access_token, username) {
   var count = 0;
   var count_iter = 0;
 
-  console.log("TESTING EPOCHS:");
   const queryParam = await getUserEpoch(username);
 
   // get recently listened to up to 50 songs
@@ -248,9 +246,8 @@ export async function getRecentlyPlayed(access_token, username) {
   )
     .then((response) => response.json())
     .then((result) => {
+      count += result.items.length;
       if (result.items != undefined) {
-        console.log(result.items.length);
-
         count += result.items.length;
 
         result.items.forEach((item) => {
@@ -356,7 +353,6 @@ async function getAllPlaylistsAndTracks(access_token, username) {
   try {
     var tracksToReturn = [];
     const playlists = await getAllPlaylists(access_token, username);
-
     for (const playlist of playlists) {
       if (playlist.owner.display_name === username) {
         const playlistTracks = await getAllPlaylistTracks(
@@ -382,8 +378,11 @@ async function getAllPlaylistsAndTracks(access_token, username) {
 
 export async function generateMasterSongList(access_token, username) {
   var savedTracks = await spotifyGetSavedTracks(access_token);
-  var tracksFromPlaylists = await getAllPlaylistsAndTracks(access_token,username);
-  
+  var tracksFromPlaylists = await getAllPlaylistsAndTracks(
+    access_token,
+    username,
+  );
+
   try {
     await getRecentlyPlayed(access_token, username);
   } catch (error) {
@@ -460,7 +459,6 @@ export async function generateMasterSongList(access_token, username) {
   try {
     listening_history.forEach(async (doc) => {
       if (savedTracks.has(doc.id)) {
-        console.log(doc.data());
         let trackObj = savedTracks.get(doc.id);
         const docData = doc.data();
         trackObj.played_at = trackObj.played_at.concat(docData.played_at);
@@ -470,7 +468,6 @@ export async function generateMasterSongList(access_token, username) {
           let temp_tracks = await spotifyGetTracks(access_token, id_string);
 
           temp_tracks.forEach((track) => {
-            console.log("listened:" + track);
             savedTracks.set(track.spotify_uri, track);
           });
 
@@ -489,7 +486,6 @@ export async function generateMasterSongList(access_token, username) {
     let temp_tracks = await spotifyGetTracks(access_token, id_string);
 
     temp_tracks.forEach((track) => {
-      console.log("listened: ", track);
       savedTracks.set(track.spotify_uri, track);
     });
   }

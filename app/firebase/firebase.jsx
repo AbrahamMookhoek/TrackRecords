@@ -174,6 +174,64 @@ export async function readListeningHistoryFromFirestore(username) {
   return firestore_history;
 }
 
+export async function writeEntryToFireStore(username, journalEntry) {
+  const queryForUser = query(collection(db, "users"), where("name", "==", username));
+  const userSnap = await getDocs(queryForUser);
+
+  const userId = userSnap.docs[0].id;
+
+  const userEntries = query(collection(db, "users", userSnap.docs[0].id, "entries"));
+  const userEntriesSnap = await getDocs(userEntries);
+
+  if (userEntriesSnap.size > 0) {
+    console.log(userEntriesSnap.size);
+  }
+
+  const docRef = doc(db, "users", userId, "entries", journalEntry.date.format("YYYY-MM-DD").toString());
+  const docSnap = await getDoc(docRef);
+  const docData = docSnap.data();
+
+  if (docData != undefined) {
+    console.log("docData:", docData);
+    console.log("entry:", journalEntry);
+    await updateDoc(docRef, {
+      title: journalEntry.title,
+      track: journalEntry.track.spotify_uri,
+      date: journalEntry.date.format("YYYY-MM-DD").toString(),
+      content: journalEntry.content
+    });
+  } else {
+    console.log("NO ASSOCIATED ENTRY FOUND");
+    await setDoc(docRef, {
+      title: journalEntry.title,
+      track: journalEntry.track.spotify_uri,
+      date: journalEntry.date.format("YYYY-MM-DD").toString(),
+      content: journalEntry.content
+    });
+  }
+}
+
+export async function readEntriesFromFirestore(username) {
+  const queryForUser = query(collection(db, "users"), where("name", "==", username));
+  const userSnap = await getDocs(queryForUser);
+
+  const entriesSnap = await getDocs(collection(db, "users", userSnap.docs[0].id, "entries"));
+
+  const firestore_entries = new Map();
+
+  entriesSnap.forEach(async (doc) => {
+    firestore_entries.set(doc.data().date, doc.data());
+  });
+
+  return firestore_entries;
+}
+
+export async function generateMasterEntryList(username) {
+  const firestore_entries = await readEntryFromFirestore(username);
+
+  return firestore_entries;
+}
+
 export async function getUserEpoch(username) {
   const queryForUser = query(
     collection(db, "users"), where("name", "==", username));

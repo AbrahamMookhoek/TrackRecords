@@ -26,7 +26,12 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx",
-    "app/store/calendarStore.js", "app/components/Wrapper.jsx", "app/dashboard/layout.jsx", "app/components/Calendar.jsx",
+    "app/store/calendarStore.js",
+    "app/components/Wrapper.jsx",
+    "app/dashboard/layout.jsx",
+    "app/components/Calendar.jsx",
+    "app/components/TextEditor.jsx",
+    "app/components/JournalEntryList.jsx",
   ],
   "exclude": ["node_modules"],
 }
