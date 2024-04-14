@@ -12,6 +12,9 @@ import { Entry } from "../shared_objects/Entry";
 import dayjs from "dayjs";
 import { useTrackStore } from "../store/trackStore";
 
+export default function JournalEntryList({ firebase_entries }) {
+  const { callUpdateFunc, entries, setEntries } = useEntryStore();
+
   const handleListItemClick = (entry) => {
     callUpdateFunc(entry);
   };
@@ -21,7 +24,6 @@ import { useTrackStore } from "../store/trackStore";
     callUpdateFunc(newEntry);
   };
 
-export default function JournalEntryList({ firebase_entries }) {
   const addedTracks = useTrackStore((state) => state.addedTracks);
   const listenedTracks = useTrackStore((state) => state.listenedTracks);
 
@@ -52,8 +54,6 @@ export default function JournalEntryList({ firebase_entries }) {
 
     entries_array.push(new Entry(value.title, track_obj, dayjs(value.date, "YYYY-MM-DD"), value.content));
   });
-
-  const { callUpdateFunc, entries, setEntries } = useEntryStore();
 
   useEffect(() => {
     setEntries(entries_array);
