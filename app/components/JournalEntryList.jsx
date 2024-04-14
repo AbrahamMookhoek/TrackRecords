@@ -12,26 +12,34 @@ import { Entry } from "../shared_objects/Entry";
 import dayjs from "dayjs";
 import { useTrackStore } from "../store/trackStore";
 
+  const handleListItemClick = (entry) => {
+    callUpdateFunc(entry);
+  };
+
+  const newEntry = () => {
+    const newEntry = new Entry("New Entry", null, dayjs(), "");
+    callUpdateFunc(newEntry);
+  };
+
 export default function JournalEntryList({ firebase_entries }) {
-  console.log("outside func:",firebase_entries);
   const addedTracks = useTrackStore((state) => state.addedTracks);
   const listenedTracks = useTrackStore((state) => state.listenedTracks);
 
   var entries_array = [];
 
   firebase_entries.forEach((value, key) => {
-    var track_obj;
+    var track_obj = null;
 
     addedTracks.forEach((date_value, date_key) => {
       date_value.forEach((track) => {
-        if (track.spotify_uri === value.track) {
+        if ((track.spotify_uri === value.track) && !track_obj) {
           track_obj = track;
         }
       })
     });
     listenedTracks.forEach((date_value, date_key) => {
       date_value.forEach((track) => {
-        if (track.spotify_uri === value.track) {
+        if (track.spotify_uri === value.track && !track_obj) {
           track_obj = track;
         }
       });
@@ -39,7 +47,8 @@ export default function JournalEntryList({ firebase_entries }) {
 
     var customParseFormat = require("dayjs/plugin/customParseFormat");
     dayjs.extend(customParseFormat);
-    console.log("!!!HERE!!!",track_obj);
+
+    console.log("added from firebase: ",track_obj);
 
     entries_array.push(new Entry(value.title, track_obj, dayjs(value.date, "YYYY-MM-DD"), value.content));
   });
@@ -48,18 +57,7 @@ export default function JournalEntryList({ firebase_entries }) {
 
   useEffect(() => {
     setEntries(entries_array);
-  }, []);
-
-  const handleListItemClick = (entry) => {
-    console.log("setting active entry");
-    console.log(entry);
-    callUpdateFunc(entry);
-  };
-
-  const newEntry = () => {
-    const newEntry = new Entry("New Entry", null, dayjs().format("YYYY-MM-DD").toString(), "");
-    callUpdateFunc(newEntry);
-  };
+  }, [addedTracks, listenedTracks]);
 
   return (
     <div className="col-span-2 ml-32 mr-1 flex flex-col overflow-auto rounded-lg bg-light_blue-100 text-black shadow-lg">
