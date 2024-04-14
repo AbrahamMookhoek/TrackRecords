@@ -8,6 +8,7 @@ import { useTrackStore } from "../store/trackStore";
 import { useQuery } from "@tanstack/react-query";
 import { createCalendarEvents, generateMasterSongList } from "../utils/spotify";
 import QuerySnackbar from "./QuerySnackbar";
+import { useRouter } from "next/navigation";
 
 const myCustomButton = {
   text: "custom!",
@@ -24,8 +25,16 @@ const isKeyExists = (key) => {
   return false;
 };
 
+function isDataStale(){
+  const lastQuery = localStorage.getItem("lastQuery")
+
+  return lastQuery && Date.now() - lastQuery >= 1 *  60 * 1000
+}
+
 export default function Calendar({ user }) {
   const calendarRef = useRef(null);
+
+  const router = useRouter()
 
   const { events, setEvents } = useCalendarStore();
   const { isEventSelected, setEventSelected } = useCalendarStore();
@@ -106,43 +115,78 @@ export default function Calendar({ user }) {
     queryFn: () => generateMasterSongList(user.spotify_access_token, user.name),
     notifyOnChangeProps: ["data", "status"],
     refetchOnWindowFocus: false,
-    enabled: !isKeyExists("tracks"),
+    enabled: !isKeyExists("tracks") || isDataStale(),
   });
 
   useEffect(() => {
-    // Check if key "tracks" doesn't exist in localStorage
-    if (!isKeyExists("tracks") && status === "success") {
-      // Run this block only if the key doesn't exist in localStorage
-      let temp = createCalendarEvents(data);
-      setAddedTracks(temp[0]);
-      setListenedTracks(temp[1]);
-      setEvents(temp[2]);
+    // handles the case in which the user is new
+    if(!isKeyExists("tracks"))
+    {
+      localStorage.setItem("lastQuery", Date.now())
 
-      // Serialize the map to JSON
-      const serializedMap = JSON.stringify([...data]);
+      if(status === "success")
+      {
+        // Run this block only if the key doesn't exist in localStorage and status is "success"
+        let temp = createCalendarEvents(data);
+        setAddedTracks(temp[0]);
+        setListenedTracks(temp[1]);
+        setEvents(temp[2]);
 
-      // Store the serialized map in localStorage
-      localStorage.setItem("tracks", serializedMap);
-      setQueryMessage("Tracks queried...");
-      setShowSnackbar(true);
-      setDataLoaded(true); // Mark data loading as complete
+        // Serialize the map to JSON
+        const serializedMap = JSON.stringify([...data]);
+
+        // Store the serialized map in localStorage
+        localStorage.setItem("tracks", serializedMap);
+        setQueryMessage("Tracks queried...");
+        setShowSnackbar(true);
+        setDataLoaded(true); // Mark data loading as complete
+
+        console.log("Render all the stuff")
+        console.log("Status is", status)
+      }
     }
 
-    // Check to see if key "tracks" exists in localStorage, if so then retrieve from localStorage
-    if (isKeyExists("tracks")) {
-      setQueryMessage("Tracks already retrieved, pulling from storage...");
-      setShowSnackbar(true);
-      // Retrieve the serialized map from localStorage
-      const storedMap = localStorage.getItem("tracks");
+    if(isKeyExists("tracks"))
+    {
+      if(isDataStale())
+      {
+        if(status === "success")
+        {
+          localStorage.setItem("lastQuery", Date.now())
+           // Run this block only if the data is stale
+          let temp = createCalendarEvents(data);
+          setAddedTracks(temp[0]);
+          setListenedTracks(temp[1]);
+          setEvents(temp[2]);
 
-      // Deserialize the stored map
-      const deserializedMap = new Map(JSON.parse(storedMap));
+          // Serialize the map to JSON
+          const serializedMap = JSON.stringify([...data]);
 
-      let temp = createCalendarEvents(deserializedMap);
-      setAddedTracks(temp[0]);
-      setListenedTracks(temp[1]);
-      setEvents(temp[2]);
-      setDataLoaded(true); // Mark data loading as complete
+          // Store the serialized map in localStorage
+          localStorage.setItem("tracks", serializedMap);
+          setQueryMessage("Tracks requeried, try refreshing the page...");
+          setShowSnackbar(true);
+          setDataLoaded(true); // Mark data loading as complete
+
+          location.reload()
+        }
+      }
+      else
+      {
+        setQueryMessage("Tracks already retrieved, pulling from storage...");
+        setShowSnackbar(true);
+        // Retrieve the serialized map from localStorage
+        const storedMap = localStorage.getItem("tracks");
+
+        // Deserialize the stored map
+        const deserializedMap = new Map(JSON.parse(storedMap));
+
+        let temp = createCalendarEvents(deserializedMap);
+        setAddedTracks(temp[0]);
+        setListenedTracks(temp[1]);
+        setEvents(temp[2]);
+        setDataLoaded(true); // Mark data loading as complete
+      }
     }
   }, [data, status]);
 
