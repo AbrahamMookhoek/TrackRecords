@@ -217,8 +217,6 @@ export async function readEntriesFromFirestore(username) {
 
   const entriesSnap = await getDocs(collection(db, "users", userSnap.docs[0].id, "entries"));
 
-  console.log("inside func:",entriesSnap.docs[0].data())
-
   const firestore_entries = new Map();
 
   entriesSnap.forEach(async (doc) => {

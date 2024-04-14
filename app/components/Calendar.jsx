@@ -28,7 +28,7 @@ const isKeyExists = (key) => {
 function isDataStale(){
   const lastQuery = localStorage.getItem("lastQuery")
 
-  return lastQuery && Date.now() - lastQuery >= 1 *  60 * 1000
+  return lastQuery && Date.now() - lastQuery >= 30 *  60 * 1000
 }
 
 export default function Calendar({ user }) {
