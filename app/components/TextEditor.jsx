@@ -16,7 +16,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { Button } from "@mui/material";
 import { InputLabel } from "@mui/material";
 import dayjs from "dayjs";
-import TrackCard from "./TrackCard";
+import TrackCardJournal from "./TrackCardJournal";
 import { useTrackStore } from "../store/trackStore";
 import { useEntryStore } from "../store/entryStore";
 import {} from "../utils/spotify";
@@ -109,8 +109,6 @@ export default function TextEditor({ user }) {
       setAddedTracks(temp[0]);
       setListenedTracks(temp[1]);
       setDataLoaded(true); // Mark data loading as complete
-
-      console.log(temp);
     }
   }, [data, status]);
 
@@ -121,27 +119,63 @@ export default function TextEditor({ user }) {
   const updateTrackList = (selectedDate) => {
     onDateChange(selectedDate);
     selectedDate = selectedDate.format("YYYY-MM-DD").toString();
-    console.log(listenedTracks);
+
     const filteredAddedTracksByDay = new Map(
       [...addedTracks].filter(([k, v]) => k === selectedDate),
-    )
-      .values()
-      .next().value;
+    ).values().next().value;
 
     const filteredListenedTracksByDay = new Map(
       [...listenedTracks].filter(([k, v]) => k === selectedDate),
-    )
-      .values()
-      .next().value;
+    ).values().next().value;
+
+    var filteredTracksByDay = [];
+
+    if(filteredAddedTracksByDay !== undefined) {
+      filteredAddedTracksByDay.forEach((value) => {
+        let duplicate = false;
+
+        if(value !== undefined) {
+          filteredTracksByDay.forEach((track) => {
+            if(track.spotify_uri === value.spotify_uri) {
+              duplicate = true;
+            }
+          })
+
+          if(!duplicate) {
+            filteredTracksByDay.push(value);
+          }
+        }
+      });
+    }
+
+    if(filteredListenedTracksByDay !== undefined) {
+      filteredListenedTracksByDay.forEach((value) => {
+        let duplicate = false;
+
+        if (value !== undefined) {
+          filteredTracksByDay.forEach((track) => {
+            if (track.spotify_uri === value.spotify_uri) {
+              duplicate = true;
+            }
+          });
+
+          if (!duplicate) {
+            filteredTracksByDay.push(value);
+          }
+        }
+      });
+    }
+
+    // var filteredTracksByDay = new Map([filteredAddedTracksByDay, filteredListenedTracksByDay]);
+    
+    // filteredListenedTracksByDay.forEach((value, key) => {
+    //   filteredAddedTracksByDay.set(key, value);
+    // });
+
+    // let filteredTracksByDay = new Map(function*() { yield* filteredAddedTracksByDay; yield* filteredListenedTracksByDay; }());
 
     //update select list to show tracks from currently selected day
-    setTrackList(
-      []
-        .concat(filteredAddedTracksByDay)
-        .concat(filteredListenedTracksByDay)
-        .filter(Boolean),
-    );
-    console.log(track_list);
+    setTrackList([].concat(filteredTracksByDay).filter(Boolean));
   };
 
   const onTitleChange = (updatedTitle) => {
@@ -149,7 +183,6 @@ export default function TextEditor({ user }) {
   };
 
   const onTrackChange = (updatedTrack) => {
-    //console.log(updatedTrack.target.value);
     setTrack(updatedTrack.target.value);
   };
 
@@ -158,7 +191,6 @@ export default function TextEditor({ user }) {
   };
 
   const onEditorChange = (updatedContent) => {
-    //console.log(updatedContent.target.value);
     setContent(updatedContent.target.value);
   };
 
@@ -184,9 +216,6 @@ export default function TextEditor({ user }) {
     //save entry to firebase
     await writeEntryToFireStore(user.name, updatedEntry);
 
-    // console.log(entries);
-    // console.log(newEntries);
-
     setQueryMessage("Saved!");
     setShowSnackbar(true);
   };
@@ -196,13 +225,8 @@ export default function TextEditor({ user }) {
     setTitle(updatedEntry.title);
     setDate(updatedEntry.date);
 
-    console.log("track list:");
-    console.log(track_list);
-    console.log(updatedEntry.date);
-
     updateTrackList(updatedEntry.date);
     //setTrackList([updatedEntry.track]);
-    console.log(track_list);
     // setTrackList(track_list.concat(updatedEntry.track));
     setTrack(updatedEntry.track);
     //make select component display selected track
@@ -216,7 +240,6 @@ export default function TextEditor({ user }) {
     if (editor) {
       editor.editor.loadHTML(updatedEntry.content);
     }
-    console.log(updatedEntry.track);
   };
 
   //all the content is just slapped in here, needs to be reorganized at some point
@@ -258,10 +281,8 @@ export default function TextEditor({ user }) {
                   track_list.map((track) => (
                     <MenuItem value={track}>
                       {
-                        <TrackCard
+                        <TrackCardJournal
                           track={track}
-                          added={track.playlists_added_to !== undefined}
-                          allowLink={false}
                         />
                       }
                     </MenuItem>
@@ -272,10 +293,8 @@ export default function TextEditor({ user }) {
           {!allowChange && (
             <div className="flex items-start md:flex-row">
               {track && (
-                <TrackCard
+                <TrackCardJournal
                   track={track}
-                  added={track.playlists_added_to !== undefined}
-                  allowLink={false}
                 />
               )}
               <Button

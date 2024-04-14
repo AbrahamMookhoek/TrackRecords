@@ -1,5 +1,5 @@
 "use client";
-import TrackCard from "./TrackCard";
+import TrackCardJournal from "./TrackCardJournal";
 
 export default function ({ entry }) {
   return (
@@ -8,10 +8,8 @@ export default function ({ entry }) {
       <h1>{entry.date.format("MM/DD/YY").toString()}</h1>
       <div>
         {entry.track && (
-          <TrackCard
+          <TrackCardJournal
             track={entry.track}
-            added={entry.track.playlists_added_to !== undefined}
-            allowLink={false}
           />
         )}
       </div>
