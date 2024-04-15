@@ -1,26 +1,28 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import Trix from "./Trix";
+import {
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  TextField,
+} from "@mui/material";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { useQuery } from "@tanstack/react-query";
+import dayjs from "dayjs";
+import React, { useEffect, useState } from "react";
+import { writeEntryToFireStore } from "../firebase/firebase";
 import { Entry } from "../shared_objects/Entry";
 import { Track } from "../shared_objects/Track";
-import QuerySnackbar from "./QuerySnackbar";
-import { useQuery } from "@tanstack/react-query";
-import { createCalendarEvents, generateMasterSongList } from "../utils/spotify";
-import { Select, SelectChangeEvent } from "@mui/material";
-import { MenuItem } from "@mui/material";
-import { TextField } from "@mui/material";
-import { DatePicker } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { Button } from "@mui/material";
-import { InputLabel } from "@mui/material";
-import dayjs from "dayjs";
-import TrackCardJournal from "./TrackCardJournal";
-import { useTrackStore } from "../store/trackStore";
 import { useEntryStore } from "../store/entryStore";
-import {} from "../utils/spotify";
-import { writeEntryToFireStore } from "../firebase/firebase";
+import { useTrackStore } from "../store/trackStore";
+import { createCalendarEvents, generateMasterSongList } from "../utils/spotify";
+import QuerySnackbar from "./QuerySnackbar";
+import TrackCardJournal from "./TrackCardJournal";
+import Trix from "./Trix";
 
 // Check if key exists in localStorage
 const isKeyExists = (key) => {
@@ -59,7 +61,6 @@ export default function TextEditor({ user }) {
   const [track, setTrack] = useState(entry.track);
   const [content, setContent] = useState(entry.content);
   const setUpdateFunc = useEntryStore((state) => state.setUpdateFunc);
-  const callAddEntryFunc = useEntryStore((state) => state.callAddEntryFunc);
 
   // code to fetch data
   const { status, data } = useQuery({
@@ -251,89 +252,109 @@ export default function TextEditor({ user }) {
 
   //all the content is just slapped in here, needs to be reorganized at some point
   return (
-    <div className="col-span-5 mr-32 rounded-lg bg-light_blue-100 p-2 text-black shadow-lg">
+    <div className="col-span-5 mr-32 flex flex-col rounded-lg bg-light_blue-100 p-2 text-black shadow-lg">
+      {/* HEADER */}
       <div className="flex flex-col gap-y-2">
-        <div className="mb-5 flex gap-x-12 align-middle">
-          <TextField
-            value={title}
-            onChange={(NewValue) => onTitleChange(NewValue)}
-          />
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            {
-              <DatePicker
-                value={date}
-                onChange={(NewValue) => updateTrackList(NewValue)}
-                disabled={!allowChange}
-              />
-            }
-          </LocalizationProvider>
-          <div>
-            {allowChange && (
-              <div>
+        <div className="my-4 flex gap-x-12 align-middle">
+          <FormControl style={{ justifyContent: "center" }}>
+            <TextField
+              value={title}
+              onChange={(NewValue) => onTitleChange(NewValue)}
+              style={{ justifyContent: "center" }}
+              label="Entry Title"
+            />
+          </FormControl>
+          <FormControl style={{ justifyContent: "center" }}>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              {
+                <DatePicker
+                  value={date}
+                  onChange={(NewValue) => updateTrackList(NewValue)}
+                  disabled={!allowChange}
+                  style={{}}
+                  label="Date Picker"
+                />
+              }
+            </LocalizationProvider>
+          </FormControl>
+
+          {allowChange && (
+            <>
+              <FormControl style={{ minWidth: "18rem" }}>
+                <InputLabel id="track-select-label">Tracks</InputLabel>
                 <Select
                   labelId="track-select-label"
-                  label="Track"
-                  value={track || "associated Tracks"}
+                  label="Associated Tracks"
+                  value={track}
                   isactive={allowChange}
                   onChange={(NewValue) => onTrackChange(NewValue)}
                 >
-                  {track_list.length > 0 &&
+                  {track_list.length > 0 ? (
                     track_list.map((track) => (
                       <MenuItem value={track}>
                         {<TrackCardJournal track={track} />}
                       </MenuItem>
-                    ))}
+                    ))
+                  ) : (
+                    <p className=" px-1">No Track Activity</p>
+                  )}
                 </Select>
-              </div>
-            )}
-            {!allowChange && (
-              <div className="flex items-start md:flex-row">
-                {track && <TrackCardJournal track={track} />}
-                <Button
-                  onClick={() => {
-                    setAllowChange(true);
-                    updateTrackList(date);
-                  }}
-                  variant="contained"
-                  color="success"
-                  style={{ margin: "10px" }}
-                >
-                  {" "}
-                  {/* Added padding style to the Button */}
-                  Change
-                </Button>
-              </div>
-            )}
-          </div>
+              </FormControl>
 
-          {/* <div className=""> */}
-          <Button
-            onClick={() => {
-              saveEntry();
-            }}
-            variant="contained"
-            color="success"
-            style={{ margin: "10px" }}
-          >
-            {" "}
-            {/* Added padding style to the Button */}
-            Save
-          </Button>
-          {/* </div> */}
+              <Button
+                onClick={() => {
+                  saveEntry();
+                }}
+                variant="contained"
+                color="success"
+                style={{ marginLeft: "auto" }}
+              >
+                {" "}
+                {/* Added padding style to the Button */}
+                Save
+              </Button>
+            </>
+          )}
+          {!allowChange && (
+            <>
+              {track && <TrackCardJournal track={track} />}
+              <Button
+                onClick={() => {
+                  setAllowChange(true);
+                  updateTrackList(date);
+                }}
+                variant="contained"
+                color="success"
+                style={{ marginLeft: "auto" }}
+              >
+                {" "}
+                {/* Added padding style to the Button */}
+                Change
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
-      <input
-        id="x"
-        value="<div>Editor content goes here</div>"
-        type="hidden"
-        name="content"
-      ></input>
-      <Trix
-        input="x"
-        defaultValue=""
-        onChange={(NewValue) => onEditorChange(NewValue)}
-      />
+      <hr className="bg-black"></hr>
+
+      {/* EDITOR */}
+      <div className="flex flex-grow flex-col rounded-md  p-3">
+        <input
+          id="x"
+          value="<div>Editor content goes here</div>"
+          type="hidden"
+          name="content"
+          className=""
+        ></input>
+
+        <Trix
+          input="x"
+          defaultValue=""
+          onChange={(NewValue) => onEditorChange(NewValue)}
+        />
+      </div>
+
       <QuerySnackbar
         open={showSnackbar}
         message={queryMessage}
