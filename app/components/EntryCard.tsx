@@ -4,15 +4,14 @@ import TrackCardJournal from "./TrackCardJournal";
 export default function ({ entry }) {
   return (
     <div>
-      <h1>{entry.title}</h1>
-      <h1>{entry.date.format("MM/DD/YY").toString()}</h1>
-      <div>
-        {entry.track && (
-          <TrackCardJournal
-            track={entry.track}
-          />
-        )}
+      <div className="flex flex-row justify-between">
+        <h1>
+          <b>{entry.title}</b>
+        </h1>
+        <p>{entry.date.format("MM/DD/YY").toString()}</p>
       </div>
+
+      <div>{entry.track && <TrackCardJournal track={entry.track} />}</div>
     </div>
   );
 }

@@ -122,33 +122,37 @@ export default function TextEditor({ user }) {
 
     const filteredAddedTracksByDay = new Map(
       [...addedTracks].filter(([k, v]) => k === selectedDate),
-    ).values().next().value;
+    )
+      .values()
+      .next().value;
 
     const filteredListenedTracksByDay = new Map(
       [...listenedTracks].filter(([k, v]) => k === selectedDate),
-    ).values().next().value;
+    )
+      .values()
+      .next().value;
 
     var filteredTracksByDay = [];
 
-    if(filteredAddedTracksByDay !== undefined) {
+    if (filteredAddedTracksByDay !== undefined) {
       filteredAddedTracksByDay.forEach((value) => {
         let duplicate = false;
 
-        if(value !== undefined) {
+        if (value !== undefined) {
           filteredTracksByDay.forEach((track) => {
-            if(track.spotify_uri === value.spotify_uri) {
+            if (track.spotify_uri === value.spotify_uri) {
               duplicate = true;
             }
-          })
+          });
 
-          if(!duplicate) {
+          if (!duplicate) {
             filteredTracksByDay.push(value);
           }
         }
       });
     }
 
-    if(filteredListenedTracksByDay !== undefined) {
+    if (filteredListenedTracksByDay !== undefined) {
       filteredListenedTracksByDay.forEach((value) => {
         let duplicate = false;
 
@@ -167,7 +171,7 @@ export default function TextEditor({ user }) {
     }
 
     // var filteredTracksByDay = new Map([filteredAddedTracksByDay, filteredListenedTracksByDay]);
-    
+
     // filteredListenedTracksByDay.forEach((value, key) => {
     //   filteredAddedTracksByDay.set(key, value);
     // });
@@ -201,7 +205,10 @@ export default function TextEditor({ user }) {
     const newEntries = [];
     let added = false;
     for (let i = 0; i < entries.length; i++) {
-      if (entries[i].date.format("YYYY-MM-DD").toString() === updatedEntry.date.format("YYYY-MM-DD").toString()) {
+      if (
+        entries[i].date.format("YYYY-MM-DD").toString() ===
+        updatedEntry.date.format("YYYY-MM-DD").toString()
+      ) {
         newEntries.unshift(updatedEntry);
         added = true;
       } else {
@@ -245,84 +252,77 @@ export default function TextEditor({ user }) {
   //all the content is just slapped in here, needs to be reorganized at some point
   return (
     <div className="col-span-5 mr-32 rounded-lg bg-light_blue-100 p-2 text-black shadow-lg">
-      <div className="flex items-start md:flex-row">
-        <TextField
-          value={title}
-          onChange={(NewValue) => onTitleChange(NewValue)}
-        />
-        <Button
-          onClick={() => {
-            saveEntry();
-          }}
-          variant="contained"
-          color="success"
-          style={{ margin: "10px" }}
-        >
-          {" "}
-          {/* Added padding style to the Button */}
-          Save
-        </Button>
-      </div>
-      <div className="flex items-start md:flex-row">
-        <div>
-          {allowChange && (
-            <div>
-              <InputLabel id="track-select-label" isactive={allowChange}>
-                Track
-              </InputLabel>
-              <Select
-                labelId="track-select-label"
-                label="Track"
-                value={track}
-                isactive={allowChange}
-                onChange={(NewValue) => onTrackChange(NewValue)}
-              >
-                {track_list.length > 0 &&
-                  track_list.map((track) => (
-                    <MenuItem value={track}>
-                      {
-                        <TrackCardJournal
-                          track={track}
-                        />
-                      }
-                    </MenuItem>
-                  ))}
-              </Select>
-            </div>
-          )}
-          {!allowChange && (
-            <div className="flex items-start md:flex-row">
-              {track && (
-                <TrackCardJournal
-                  track={track}
-                />
-              )}
-              <Button
-                onClick={() => {
-                  setAllowChange(true);
-                  updateTrackList(date);
-                }}
-                variant="contained"
-                color="success"
-                style={{ margin: "10px" }}
-              >
-                {" "}
-                {/* Added padding style to the Button */}
-                Change
-              </Button>
-            </div>
-          )}
+      <div className="flex flex-col gap-y-2">
+        <div className="mb-5 flex gap-x-12 align-middle">
+          <TextField
+            value={title}
+            onChange={(NewValue) => onTitleChange(NewValue)}
+          />
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            {
+              <DatePicker
+                value={date}
+                onChange={(NewValue) => updateTrackList(NewValue)}
+                disabled={!allowChange}
+              />
+            }
+          </LocalizationProvider>
+          <div>
+            {allowChange && (
+              <div>
+                <Select
+                  labelId="track-select-label"
+                  label="Track"
+                  value={track || "associated Tracks"}
+                  isactive={allowChange}
+                  onChange={(NewValue) => onTrackChange(NewValue)}
+                >
+                  {track_list.length > 0 &&
+                    track_list.map((track) => (
+                      <MenuItem value={track}>
+                        {<TrackCardJournal track={track} />}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </div>
+            )}
+            {!allowChange && (
+              <div className="flex items-start md:flex-row">
+                {track && <TrackCardJournal track={track} />}
+                <Button
+                  onClick={() => {
+                    setAllowChange(true);
+                    updateTrackList(date);
+                  }}
+                  variant="contained"
+                  color="success"
+                  style={{ margin: "10px" }}
+                >
+                  {" "}
+                  {/* Added padding style to the Button */}
+                  Change
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* <div className=""> */}
+          <Button
+            onClick={() => {
+              saveEntry();
+            }}
+            variant="contained"
+            color="success"
+            style={{ margin: "10px" }}
+          >
+            {" "}
+            {/* Added padding style to the Button */}
+            Save
+          </Button>
+          {/* </div> */}
         </div>
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          {
-            <DatePicker
-              value={date}
-              onChange={(NewValue) => updateTrackList(NewValue)}
-              disabled={!allowChange}
-            />
-          }
-        </LocalizationProvider>
       </div>
+
       <input
         id="x"
         value="<div>Editor content goes here</div>"
