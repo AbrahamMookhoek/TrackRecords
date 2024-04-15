@@ -1,6 +1,6 @@
 import { db } from "@/app/firebase/config";
 import { Track } from "../shared_objects/Track";
-import { collection, doc, setDoc, getDocs, updateDoc, query, where, arrayUnion, getDoc } from "firebase/firestore";
+import { collection, doc, setDoc, getDocs, updateDoc, query, where, getDoc } from "firebase/firestore";
 
 export async function writeTracksToFirestore(user_name, tracks) {
   const queryForUser = query(
@@ -13,16 +13,10 @@ export async function writeTracksToFirestore(user_name, tracks) {
 
   for (const index in tracks) {
     try {
-      const docRef = doc(
-        db,
-        "users",
-        userSnap.docs[0].id,
-        "tracks",
-        tracks[index].spotify_id,
-      );
+      const docRef = doc(db, "users", userSnap.docs[0].id, "tracks", tracks[index].spotify_id);
       await setDoc(docRef, {
         spotify_id: tracks[index].spotify_id,
-        added_at: tracks[index].added_at,
+        genres: tracks[index].genres,
         album_image: tracks[index].album_image,
         album_name: tracks[index].album_name,
         artist_names: tracks[index].artist_names,
@@ -30,9 +24,10 @@ export async function writeTracksToFirestore(user_name, tracks) {
         track_duration: tracks[index].track_duration,
         track_link: tracks[index].track_link,
         track_name: tracks[index].track_name,
+        added_at: tracks[index].added_at,
+        played_at: tracks[index].played_at
       });
       count += 1;
-      // console.log("Document written with ID: ", docRef.id);
     } catch (e) {
       console.error("Error adding document: ", e);
     }
@@ -55,7 +50,7 @@ export async function readTracksFromFirestore(user_name) {
     tracks.push(
       new Track(
         doc.id,
-        doc.data().added_at,
+        doc.data().genres,
         doc.data().album_image,
         doc.data().album_name,
         doc.data().artist_names,
@@ -63,6 +58,8 @@ export async function readTracksFromFirestore(user_name) {
         doc.data().track_duration,
         doc.data().track_link,
         doc.data().track_name,
+        doc.data().added_at,
+        doc.data().played_at
       ),
     );
   });
@@ -87,7 +84,7 @@ export async function readMonthTracksFromFirestore(user_name, month) {
     tracks.push(
       new Track(
         doc.id,
-        doc.data().added_at,
+        doc.data().genres,
         doc.data().album_image,
         doc.data().album_name,
         doc.data().artist_names,
@@ -95,6 +92,8 @@ export async function readMonthTracksFromFirestore(user_name, month) {
         doc.data().track_duration,
         doc.data().track_link,
         doc.data().track_name,
+        doc.data().added_at,
+        doc.data().played_at
       ),
     );
   });

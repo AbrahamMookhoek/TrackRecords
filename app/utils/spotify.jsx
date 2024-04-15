@@ -57,23 +57,25 @@ export async function spotifyGetTracks(access_token, track_ids) {
     .then((result) => {
       var artistsNameArray = [];
       var artistsLinkArray = [];
+      var genresArray = [];
 
       if (result != undefined) {
         result.tracks.forEach((track) => {
           artistsNameArray = [];
           artistsLinkArray = [];
+          genresArray = [];
 
           track.artists.forEach((artist) => {
             artistsNameArray.push(artist.name);
             artistsLinkArray.push(artist.external_urls.spotify);
+            genresArray = artist.genres;
           });
 
           temp_tracks.push(
             new Track(
               track.uri.split(":").pop(),
-              track.album.images.length !== 0
-                ? track.album.images[track.album.images.length - 1].url
-                : "Unknown",
+              genresArray,
+              track.album.images.length !== 0 ? track.album.images[track.album.images.length - 1].url : "Unknown",
               track.album.name,
               artistsNameArray,
               artistsLinkArray,
@@ -105,6 +107,7 @@ export async function spotifyGetSavedTracks(access_token) {
   var tracks_added = [];
   var artistsNameArray = [];
   var artistsLinkArray = [];
+  var genresArray = [];
   var nextSongBatchLink = "";
   // below 2 variables are purely for debugging
   var count = 0;
@@ -122,20 +125,20 @@ export async function spotifyGetSavedTracks(access_token) {
       result.items.forEach((item) => {
         artistsNameArray = [];
         artistsLinkArray = [];
+        genresArray = [];
 
         if (item != undefined) {
           item.track.artists.forEach((artist) => {
             artistsNameArray.push(artist.name);
             artistsLinkArray.push(artist.external_urls.spotify);
+            genresArray = artist.genres;
           });
 
           tracks_added.push(
             new Track(
               item.track.uri.split(":").pop(),
-              item.track.album.images.length !== 0
-                ? item.track.album.images[item.track.album.images.length - 1]
-                    .url
-                : "Unknown",
+              genresArray,
+              item.track.album.images.length !== 0 ? item.track.album.images[item.track.album.images.length - 1].url : "Unknown",
               item.track.album.name,
               artistsNameArray,
               artistsLinkArray,
@@ -169,20 +172,20 @@ export async function spotifyGetSavedTracks(access_token) {
         result.items.forEach((item) => {
           artistsNameArray = [];
           artistsLinkArray = [];
+          genresArray = [];
 
           if (item != undefined) {
             item.track.artists.forEach((artist) => {
               artistsNameArray.push(artist.name);
               artistsLinkArray.push(artist.external_urls.spotify);
+              genresArray = artist.genres;
             });
 
             tracks_added.push(
               new Track(
                 item.track.uri.split(":").pop(),
-                item.track.album.images.length !== 0
-                  ? item.track.album.images[item.track.album.images.length - 1]
-                      .url
-                  : "Unknown",
+                genresArray,
+                item.track.album.images.length !== 0 ? item.track.album.images[item.track.album.images.length - 1].url : "Unknown",
                 item.track.album.name,
                 artistsNameArray,
                 artistsLinkArray,
@@ -230,6 +233,7 @@ export async function getRecentlyPlayed(access_token, username) {
   var tracks_played = [];
   var artistsNameArray = [];
   var artistsLinkArray = [];
+  var genresArray = [];
   // below 2 variables are purely for debugging
   var count = 0;
   var count_iter = 0;
@@ -254,20 +258,20 @@ export async function getRecentlyPlayed(access_token, username) {
         result.items.forEach((item) => {
           artistsNameArray = [];
           artistsLinkArray = [];
+          genresArray = [];
 
           if (item != undefined) {
             item.track.artists.forEach((artist) => {
               artistsNameArray.push(artist.name);
               artistsLinkArray.push(artist.external_urls.spotify);
+              genresArray = artist.genres;
             });
 
             tracks_played.push(
               new Track(
                 item.track.uri.split(":").pop(),
-                item.track.album.images.length !== 0
-                  ? item.track.album.images[item.track.album.images.length - 1]
-                      .url
-                  : "Unknown",
+                genresArray,
+                item.track.album.images.length !== 0 ? item.track.album.images[item.track.album.images.length - 1].url : "Unknown",
                 item.track.album.name,
                 artistsNameArray,
                 artistsLinkArray,
@@ -397,21 +401,20 @@ export async function generateMasterSongList(access_token, username) {
     tracksFromPlaylists.map((playlistItem) => {
       let artistsNameArray = [];
       let artistsLinkArray = [];
+      let genresArray = [];
 
       if (playlistItem != undefined) {
         playlistItem.track.artists.forEach((artist) => {
           artistsNameArray.push(artist.name);
           artistsLinkArray.push(artist.external_urls.spotify);
+          genresArray = artist.genres;
         });
       }
 
       let trackObj = new Track(
         playlistItem.track.uri.split(":").pop(),
-        playlistItem.track.album.images.length !== 0
-          ? playlistItem.track.album.images[
-              playlistItem.track.album.images.length - 1
-            ].url
-          : "Unknown",
+        genresArray,
+        playlistItem.track.album.images.length !== 0 ? playlistItem.track.album.images[playlistItem.track.album.images.length - 1].url : "Unknown",
         playlistItem.track.album.name,
         artistsNameArray,
         artistsLinkArray,
@@ -506,6 +509,7 @@ export function createCalendarEvents(tracks) {
     track_obj.playlists_added_to.map((playlist) => {
       let tempTrack = new Track(
         track_obj.spotify_uri,
+        track_obj.genres,
         track_obj.album_image,
         track_obj.album_name,
         track_obj.artist_names,
@@ -544,6 +548,7 @@ export function createCalendarEvents(tracks) {
     track_obj.played_at.map((listened) => {
       let tempTrack = new Track(
         track_obj.spotify_uri,
+        track_obj.genres,
         track_obj.album_image,
         track_obj.album_name,
         track_obj.artist_names,
