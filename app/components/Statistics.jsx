@@ -205,9 +205,9 @@ export default function Statistics({ user }) {
   const [queryMessage, setQueryMessage] = useState("");
   const [tracks, setTracks] = useState([]);
 
-  const [artistOverallOptions, setArtistOverallOptions] = useState(undefined)
-  const [artistPlayedOptions, setArtistPlayedOptions] = useState(undefined)
-  const [artistAddedOptions, setArtistAddedOptions] = useState(undefined)
+  const [artistOverallOptions, setArtistOverallOptions] = useState(undefined);
+  const [artistPlayedOptions, setArtistPlayedOptions] = useState(undefined);
+  const [artistAddedOptions, setArtistAddedOptions] = useState(undefined);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -262,21 +262,25 @@ export default function Statistics({ user }) {
         const artistAddedMetrics = getArtistAddedMetrics(deserializedMap);
         const artistPlayedMetrics = getArtistPlayedMetrics(deserializedMap);
         const artistOverallMetrics = getArtistOverallMetrics(deserializedMap);
-    
-        console.log(artistAddedMetrics, artistPlayedMetrics, artistOverallMetrics);
-    
+
+        console.log(
+          artistAddedMetrics,
+          artistPlayedMetrics,
+          artistOverallMetrics,
+        );
+
         // create variables to store respective top 10 artist values
         var topAddedArtists = [];
         artistAddedMetrics.forEach((value, key) => {
           topAddedArtists.sort(function (a, b) {
             return a[0] - b[0];
           });
-    
+
           if (topAddedArtists.length < 10) {
             topAddedArtists.push([value, key]);
           } else {
             let finished = false;
-    
+
             topAddedArtists.forEach(function (pair, index) {
               if (value > pair[0] && !finished) {
                 this[index] = [value, key];
@@ -285,18 +289,18 @@ export default function Statistics({ user }) {
             }, topAddedArtists);
           }
         });
-    
+
         var topPlayedArtists = [];
         artistPlayedMetrics.forEach((value, key) => {
           topPlayedArtists.sort(function (a, b) {
             return a[0] - b[0];
           });
-    
+
           if (topPlayedArtists.length < 10) {
             topPlayedArtists.push([value, key]);
           } else {
             let finished = false;
-    
+
             topPlayedArtists.forEach(function (pair, index) {
               if (value > pair[0] && !finished) {
                 this[index] = [value, key];
@@ -305,18 +309,18 @@ export default function Statistics({ user }) {
             }, topPlayedArtists);
           }
         });
-    
+
         var topOverallArtists = [];
         artistOverallMetrics.forEach((value, key) => {
           topOverallArtists.sort(function (a, b) {
             return a[0] - b[0];
           });
-    
+
           if (topOverallArtists.length < 10) {
             topOverallArtists.push([value, key]);
           } else {
             let finished = false;
-    
+
             topOverallArtists.forEach(function (pair, index) {
               if (value > pair[0] && !finished) {
                 this[index] = [value, key];
@@ -325,15 +329,38 @@ export default function Statistics({ user }) {
             }, topOverallArtists);
           }
         });
-    
+
         // create the top 10 added artists bubble plot options
         setArtistAddedOptions({
           chart: {
-            backgroundColor: "rgba(0,0,0,0)",
+            backgroundColor: "#3c3c3c",
             type: "packedbubble",
+            borderRadius: 20,
           },
           title: {
             text: "Top 10 Added Artists",
+            style: {
+              color: "#ffffff", // White text color for x-axis labels
+            },
+          },
+          xAxis: {
+            labels: {
+              style: {
+                color: "#ffffff", // White text color for x-axis labels
+              },
+            },
+          },
+          yAxis: {
+            labels: {
+              style: {
+                color: "#ffffff", // White text color for y-axis labels
+              },
+            },
+          },
+          legend: {
+            itemStyle: {
+              color: "#ffffff", // White text color for legend items
+            },
           },
           plotOptions: {
             packedbubble: {
@@ -345,7 +372,7 @@ export default function Statistics({ user }) {
                 splitSeries: false,
                 gravitationalConstant: 0.02,
               },
-    
+
               dataLabels: {
                 enabled: true,
                 format: "{point.name}",
@@ -354,9 +381,9 @@ export default function Statistics({ user }) {
                   operator: ">",
                   value: 250,
                 },
-    
+
                 style: {
-                  color: "black",
+                  color: "white",
                   textOutline: "none",
                   fontWeight: "normal",
                 },
@@ -456,17 +483,40 @@ export default function Statistics({ user }) {
             },
           ],
         });
-    
+
         // create the top 10 played artists bubble plot options
         setArtistPlayedOptions({
           chart: {
-            backgroundColor: "rgba(0,0,0,0)",
+            backgroundColor: "#3c3c3c",
             type: "packedbubble",
+            borderRadius: 20,
           },
           title: {
             text: "Top 10 Played Artists",
+            style: {
+              color: "#ffffff", // White text color for the title
+            },
           },
-    
+          xAxis: {
+            labels: {
+              style: {
+                color: "#ffffff", // White text color for x-axis labels
+              },
+            },
+          },
+          yAxis: {
+            labels: {
+              style: {
+                color: "#ffffff", // White text color for y-axis labels
+              },
+            },
+          },
+          legend: {
+            itemStyle: {
+              color: "#ffffff", // White text color for legend items
+            },
+          },
+
           plotOptions: {
             packedbubble: {
               minSize: "30%",
@@ -477,7 +527,7 @@ export default function Statistics({ user }) {
                 splitSeries: false,
                 gravitationalConstant: 0.02,
               },
-    
+
               dataLabels: {
                 enabled: true,
                 format: "{point.name}",
@@ -486,16 +536,16 @@ export default function Statistics({ user }) {
                   operator: ">",
                   value: 250,
                 },
-    
+
                 style: {
-                  color: "black",
+                  color: "white",
                   textOutline: "none",
                   fontWeight: "normal",
                 },
               },
             },
           },
-    
+
           series: [
             {
               name: topPlayedArtists[0][1],
@@ -589,17 +639,40 @@ export default function Statistics({ user }) {
             },
           ],
         });
-    
+
         // create the top 10 overall artists bubble plot options
         setArtistOverallOptions({
           chart: {
-            backgroundColor: "rgba(0,0,0,0)",
+            backgroundColor: "#3c3c3c",
             type: "packedbubble",
+            borderRadius: 20,
           },
           title: {
             text: "Top 10 Overall Artists",
+            style: {
+              color: "#ffffff", // White text color for the title
+            },
           },
-    
+          xAxis: {
+            labels: {
+              style: {
+                color: "#ffffff", // White text color for x-axis labels
+              },
+            },
+          },
+          yAxis: {
+            labels: {
+              style: {
+                color: "#ffffff", // White text color for y-axis labels
+              },
+            },
+          },
+          legend: {
+            itemStyle: {
+              color: "#ffffff", // White text color for legend items
+            },
+          },
+
           plotOptions: {
             packedbubble: {
               minSize: "30%",
@@ -610,7 +683,7 @@ export default function Statistics({ user }) {
                 splitSeries: false,
                 gravitationalConstant: 0.02,
               },
-    
+
               dataLabels: {
                 enabled: true,
                 format: "{point.name}",
@@ -619,16 +692,16 @@ export default function Statistics({ user }) {
                   operator: ">",
                   value: 250,
                 },
-    
+
                 style: {
-                  color: "black",
+                  color: "white",
                   textOutline: "none",
                   fontWeight: "normal",
                 },
               },
             },
           },
-    
+
           series: [
             {
               name: topOverallArtists[0][1],
@@ -727,7 +800,6 @@ export default function Statistics({ user }) {
       }
     }
   }, [data, status]);
-
 
   // calculate genre metrics
   // const genresAddedMetrics = getGenresAddedMetrics(tracks);
@@ -948,7 +1020,7 @@ export default function Statistics({ user }) {
   };
 
   return (
-    <div className="relative col-span-full row-span-10 mx-32 rounded-lg bg-light_blue-100 p-2 text-black shadow-lg">
+    <div className="relative col-span-full row-span-10 mx-32 flex flex-col rounded-lg bg-light_blue-100 p-2 text-black shadow-lg">
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
         <Tabs
           value={value}
@@ -961,60 +1033,55 @@ export default function Statistics({ user }) {
         </Tabs>
       </Box>
       <CustomTabPanel value={value} index={0}>
-        <div className="... flex flex-col overflow-scroll">
+        <div className="flex flex-grow flex-col items-center gap-4">
           {dataLoaded && (
-            <div className="flex flex-col overflow-scroll">
-              <div>
-                {" "}
-                {/*Artist Overall*/}
-                <HighchartsReact
-                  highcharts={Highcharts}
-                  options={artistOverallOptions}
-                />
-              </div>
-              <div className="... flex flex-row">
-                <div>
-                  {" "}
-                  {/*Artist Added*/}
-                  <HighchartsReact
-                    highcharts={Highcharts}
-                    options={artistAddedOptions}
-                  />
-                </div>
-                <div>
-                  {console.log(artistPlayedOptions)}
-                  {/*Artist Played*/}
-                  <HighchartsReact
-                    highcharts={Highcharts}
-                    options={artistPlayedOptions}
-                  />
-                </div>
-              </div>
-              <div>
-                {" "}
-                {/*Artist Overall*/}
+            <>
+              {/*Artist Overall*/}
+              <div style={{ width: "77%" }}>
                 <HighchartsReact
                   highcharts={Highcharts}
                   options={artistOverallOptions}
                 />
               </div>
 
-              
-              <div className="flex flex-column">
-                <div>
-                  <HighchartsReact
-                    highcharts={Highcharts}
-                    options={trackOptions}
-                  />
-                </div>
-                <div>
-                  <HighchartsReact
-                    highcharts={Highcharts}
-                    options={trackOptions}
-                  />
-                </div>
+              {/*Artists Added/Played*/}
+              <div className="flex gap-4">
+                <HighchartsReact
+                  highcharts={Highcharts}
+                  options={artistAddedOptions}
+                  containerProps={{ className: "flex-grow chart-style" }}
+                />
+
+                <HighchartsReact
+                  highcharts={Highcharts}
+                  options={artistPlayedOptions}
+                  containerProps={{ className: "flex-grow chart-style" }}
+                />
               </div>
-            </div>
+
+              {/*Artist Overall*/}
+              <div style={{ width: "77%" }}>
+                <HighchartsReact
+                  highcharts={Highcharts}
+                  options={artistOverallOptions}
+                />
+              </div>
+
+              {/*Artists Added/Played*/}
+              <div className="flex gap-4">
+                <HighchartsReact
+                  highcharts={Highcharts}
+                  options={artistAddedOptions}
+                  containerProps={{ className: "flex-grow chart-style" }}
+                />
+
+                <HighchartsReact
+                  highcharts={Highcharts}
+                  options={artistPlayedOptions}
+                  containerProps={{ className: "flex-grow chart-style" }}
+                />
+              </div>
+            </>
           )}
         </div>
       </CustomTabPanel>
@@ -1022,7 +1089,16 @@ export default function Statistics({ user }) {
         Genre
       </CustomTabPanel>
       <CustomTabPanel value={value} index={2}>
-        Tracks
+        <div className="grid grid-cols-2 gap-4">
+          {dataLoaded && (
+            <>
+              <HighchartsReact highcharts={Highcharts} options={trackOptions} />
+              <HighchartsReact highcharts={Highcharts} options={trackOptions} />
+            </>
+          )}
+        </div>
+
+        {/*Track Metrics */}
       </CustomTabPanel>
       <QuerySnackbar
         open={showSnackbar}
@@ -1044,11 +1120,7 @@ function CustomTabPanel(props) {
       aria-labelledby={`simple-tab-${index}`}
       {...other}
     >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          {children}
-        </Box>
-      )}
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
   );
 }
