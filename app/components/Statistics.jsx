@@ -5,15 +5,22 @@ import PropTypes from "prop-types";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 import { useQuery } from "@tanstack/react-query";
 import { generateMasterSongList } from "../utils/spotify";
 import QuerySnackbar from "./QuerySnackbar";
 
+import Button from "@mui/material/Button";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import FilterListIcon from "@mui/icons-material/FilterList";
+
 import Highcharts from "highcharts";
 import HighchartsMore from "highcharts/highcharts-more";
 import HighchartsReact from "highcharts-react-official";
 import HighchartsExporting from "highcharts/modules/exporting";
+import StatTrackCard from "./StatTrackCard";
 
 // module inits should be inside this if statement to avoid next.js issues
 if (typeof Highcharts === "object") {
@@ -209,7 +216,73 @@ export default function Statistics({ user }) {
   const [artistPlayedOptions, setArtistPlayedOptions] = useState(undefined);
   const [artistAddedOptions, setArtistAddedOptions] = useState(undefined);
 
-  const handleChange = (event, newValue) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredData, setFilteredData] = useState([]);
+
+  const [anchorFilterEl, setAnchorFilterEl] = useState(null);
+  const [filterSelection, setFilterSelection] = useState("");
+
+  const handleFilterMenuOpen = (event) => {
+    setAnchorFilterEl(event.currentTarget);
+  };
+
+  const handleFilterMenuClose = () => {
+    setAnchorFilterEl(null);
+  };
+
+  const handleFilterOptionClick = (filterOption) => {
+    setFilterSelection(filterOption);
+    var filteredTracks = [];
+    if (filterOption == "name") {
+      const temp = [...tracks.values()];
+
+      filteredTracks = temp.filter((track) =>
+        track?.track_name.toLowerCase().includes(searchTerm),
+      );
+    } else if (filterOption == "artist") {
+      const temp = [...tracks.values()];
+
+      filteredTracks = temp.filter((track) =>
+        track?.artist_names.some((artist) =>
+          artist.toLowerCase().includes(searchTerm),
+        ),
+      );
+    }
+
+    filteredTracks.sort((a, b) => {
+      console.log(a, b);
+      var textA = a.track_name.toUpperCase();
+      var textB = b.track_name.toUpperCase();
+      return textA < textB ? -1 : textA > textB ? 1 : 0;
+    });
+    setFilteredData(filteredTracks);
+    handleFilterMenuClose();
+  };
+
+  const handleSearchChange = (event) => {
+    //TODO based on search term, filter data down based on the artist name or track title!
+    const userInput = event.target.value.toLowerCase();
+    setSearchTerm(userInput);
+
+    const temp = [...tracks.values()];
+
+    const filteredTracks = temp.filter(
+      (track) =>
+        track?.track_name.toLowerCase().includes(userInput) ||
+        track?.artist_names[0].toLowerCase().includes(userInput),
+    );
+
+    filteredTracks.sort((a, b) => {
+      console.log(a, b);
+      var textA = a.track_name.toUpperCase();
+      var textB = b.track_name.toUpperCase();
+      return textA < textB ? -1 : textA > textB ? 1 : 0;
+    });
+
+    setFilteredData(filteredTracks);
+  };
+
+  const handleTabChange = (event, newValue) => {
     setValue(newValue);
   };
 
@@ -236,6 +309,7 @@ export default function Statistics({ user }) {
       localStorage.setItem("tracks", serializedMap);
 
       setTracks(data);
+      setFilteredData([...data.values()]);
       console.log("serialized:", deserializedMap);
 
       setQueryMessage("Tracks queried...");
@@ -252,6 +326,7 @@ export default function Statistics({ user }) {
       const deserializedMap = new Map(JSON.parse(storedMap));
 
       setTracks(deserializedMap);
+      setFilteredData([...deserializedMap.values()]);
 
       setQueryMessage("Tracks already retrieved, pulling from storage...");
       setShowSnackbar(true);
@@ -1024,7 +1099,7 @@ export default function Statistics({ user }) {
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
         <Tabs
           value={value}
-          onChange={handleChange}
+          onChange={handleTabChange}
           aria-label="basic tabs example"
         >
           <Tab label="Overview" {...a11yProps(0)} />
@@ -1058,29 +1133,6 @@ export default function Statistics({ user }) {
                   containerProps={{ className: "flex-grow chart-style" }}
                 />
               </div>
-
-              {/*Artist Overall*/}
-              <div style={{ width: "77%" }}>
-                <HighchartsReact
-                  highcharts={Highcharts}
-                  options={artistOverallOptions}
-                />
-              </div>
-
-              {/*Artists Added/Played*/}
-              <div className="flex gap-4">
-                <HighchartsReact
-                  highcharts={Highcharts}
-                  options={artistAddedOptions}
-                  containerProps={{ className: "flex-grow chart-style" }}
-                />
-
-                <HighchartsReact
-                  highcharts={Highcharts}
-                  options={artistPlayedOptions}
-                  containerProps={{ className: "flex-grow chart-style" }}
-                />
-              </div>
             </>
           )}
         </div>
@@ -1089,12 +1141,54 @@ export default function Statistics({ user }) {
         Genre
       </CustomTabPanel>
       <CustomTabPanel value={value} index={2}>
-        <div className="grid grid-cols-2 gap-4">
-          {dataLoaded && (
+        <div className="flex justify-between gap-x-4">
+          <TextField
+            label="Search"
+            variant="filled"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            margin="normal"
+          />
+          <Button onClick={handleFilterMenuOpen} startIcon={<FilterListIcon />}>
+            Filter
+          </Button>
+          <Menu
+            anchorEl={anchorFilterEl}
+            open={Boolean(anchorFilterEl)}
+            onClose={handleFilterMenuClose}
+          >
+            <MenuItem
+              onClick={() => handleFilterOptionClick("name")}
+              selected={filterSelection === "name"}
+            >
+              Filter by Name
+            </MenuItem>
+            <MenuItem
+              onClick={() => handleFilterOptionClick("artist")}
+              selected={filterSelection === "artist"}
+            >
+              Filter by Artist
+            </MenuItem>
+          </Menu>
+        </div>
+        <div className="mt-1 grid grid-cols-4 gap-4">
+          {/* {dataLoaded && (
             <>
               <HighchartsReact highcharts={Highcharts} options={trackOptions} />
               <HighchartsReact highcharts={Highcharts} options={trackOptions} />
             </>
+          )} */}
+          {dataLoaded && (
+            <>
+              {filteredData.map((track) => {
+                return (
+                  <StatTrackCard
+                    key={track.spotify_uri}
+                    track={track}
+                  ></StatTrackCard>
+                );
+              })}
+            </> // bro is coooooking
           )}
         </div>
 

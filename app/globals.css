@@ -199,6 +199,7 @@ body {
   }
 }
 
-#simple-tabpanel-0 {
+#simple-tabpanel-0,
+#simple-tabpanel-2 {
   overflow-y: scroll;
 }
