@@ -1,19 +1,51 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { Button } from "@mui/material";
 import { Add } from "@mui/icons-material";
+import { Button, Divider, ListItemButton } from "@mui/material";
 import List from "@mui/material/List";
-import { ListItemButton } from "@mui/material";
-import { Divider } from "@mui/material";
-import EntryCard from "./EntryCard";
-import { useEntryStore } from "../store/entryStore";
-import { Entry } from "../shared_objects/Entry";
+import TextField from "@mui/material/TextField";
 import dayjs from "dayjs";
+import React, { useEffect, useState } from "react";
+import { Entry } from "../shared_objects/Entry";
+import { useEntryStore } from "../store/entryStore";
 import { useTrackStore } from "../store/trackStore";
+import EntryCard from "./EntryCard";
 
 export default function JournalEntryList({ firebase_entries }) {
   const { callUpdateFunc, entries, setEntries } = useEntryStore();
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredData, setFilteredData] = useState([]);
+
+  useEffect(() => {
+    setFilteredData(entries);
+  }, [entries]);
+
+  const handleSearchChange = (event) => {
+    const userInput = event.target.value.toLowerCase();
+    setSearchTerm(userInput);
+
+    const filteredEntries = entries.filter(
+      (entry) =>
+        entry?.title.toLowerCase().includes(userInput) ||
+        entry?.track?.artist_names[0].toLowerCase().includes(userInput) ||
+        entry?.track?.track_name.toLowerCase().includes(userInput) ||
+        (entry?.date.format("MM/DD/YY").toString() &&
+          entry.date
+            .format("MM/DD/YY")
+            .toString()
+            .toLowerCase()
+            .includes(userInput)), // Including date search,
+    );
+
+    filteredEntries.sort((a, b) => {
+      var textA = a.title.toUpperCase();
+      var textB = b.title.toUpperCase();
+      return textA < textB ? -1 : textA > textB ? 1 : 0;
+    });
+
+    setFilteredData(filteredEntries);
+  };
 
   const handleListItemClick = (entry) => {
     callUpdateFunc(entry);
@@ -50,7 +82,7 @@ export default function JournalEntryList({ firebase_entries }) {
     var customParseFormat = require("dayjs/plugin/customParseFormat");
     dayjs.extend(customParseFormat);
 
-    console.log("added from firebase: ", track_obj);
+    // console.log("added from firebase: ", track_obj);
 
     entries_array.push(
       new Entry(
@@ -71,10 +103,19 @@ export default function JournalEntryList({ firebase_entries }) {
       <div className="flex w-full justify-center py-2">
         <h2 className="text-2xl">Journal Entries</h2>
       </div>
+      <div className="mx-4 flex justify-between gap-x-4">
+        <TextField
+          label="Search"
+          variant="filled"
+          value={searchTerm}
+          onChange={handleSearchChange}
+          margin="normal"
+        />
+      </div>
       <div className="flex max-h-min flex-col overflow-auto">
         {
           <List>
-            {entries.map((entry) => {
+            {filteredData.map((entry) => {
               return (
                 //change key here if entry is given an actual id
                 <ListItemButton
