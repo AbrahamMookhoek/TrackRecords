@@ -134,6 +134,8 @@ export default function Calendar({ user }) {
       // Deserialize the stored map
       const deserializedMap = new Map(JSON.parse(storedMap));
 
+      console.log(deserializedMap.get("2dgrYdgguVZKeCsrVb9XEs"))
+
       let temp = createCalendarEvents(deserializedMap);
       setAddedTracks(temp[0]);
       setListenedTracks(temp[1]);

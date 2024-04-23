@@ -33,6 +33,12 @@ export default async function refreshAccessToken(refresh_token) {
   return info;
 }
 
+// Import or define sleep function
+async function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Modify spotifyGetTracks function
 export async function spotifyGetTracks(access_token, track_ids) {
   var myHeaders = new Headers();
   myHeaders.append("Authorization", "Bearer " + access_token);
@@ -43,18 +49,28 @@ export async function spotifyGetTracks(access_token, track_ids) {
     redirect: "follow",
   };
 
-  // below 2 variables are purely for debugging
   var temp_tracks = [];
 
-  // get all tracks in saved library
-  await fetch(
-    "https://api.spotify.com/v1/tracks?ids=" + track_ids,
-    requestOptions,
-  )
-    .then((response) => {
-      return response.json();
+  try {
+    // Fetch tracks
+    await fetch(
+      "https://api.spotify.com/v1/tracks?ids=" + track_ids,
+      requestOptions,
+    )
+    .then(async (response) => {
+      if (response.ok) {
+        return response.json();
+      } else if (response.status === 429) {
+        // If 429 (too many requests), implement exponential backoff
+        console.log("Too many requests. Retrying...");
+        await sleep(30000); // Initial wait time, 30 seconds
+        return spotifyGetTracks(access_token, track_ids); // Retry
+      } else {
+        throw new Error('Request failed with status ' + response.status);
+      }
     })
     .then((result) => {
+      // Process result
       var artistsNameArray = [];
       var artistsLinkArray = [];
       var genresArray = [];
@@ -90,6 +106,9 @@ export async function spotifyGetTracks(access_token, track_ids) {
       }
     })
     .catch((error) => console.log("error", error));
+  } catch (error) {
+    console.log("Error fetching tracks:", error);
+  }
 
   return temp_tracks;
 }
@@ -458,34 +477,40 @@ export async function generateMasterSongList(access_token, username) {
     console.log(error);
   }
 
-  var spotify_ids = [];
+// Modify code calling the function
+var spotify_ids = [];
+var counter = 0;
 
-  try {
-    listening_history.forEach(async (doc) => {
-      if (savedTracks.has(doc.id)) {
-        let trackObj = savedTracks.get(doc.id);
-        const docData = doc.data();
-        trackObj.played_at = trackObj.played_at.concat(docData.played_at);
+try {
+  for (const doc of listening_history) {
+    const id = doc.id;
+    if (savedTracks.has(id)) {
+      let trackObj = savedTracks.get(id);
+      trackObj.played_at = trackObj.played_at.concat(doc.played_at);
+    } else {
+      if (spotify_ids.length === 50) {
+        console.log("Times queried:", ++counter)
+        let id_string = spotify_ids.join(",");
+        let temp_tracks = await spotifyGetTracks(access_token, id_string);
+
+        temp_tracks.forEach((track) => {
+          savedTracks.set(track.spotify_uri, track);
+        });
+
+        spotify_ids = [];
       } else {
-        if (spotify_ids.length === 50) {
-          let id_string = spotify_ids.join(",");
-          let temp_tracks = await spotifyGetTracks(access_token, id_string);
-
-          temp_tracks.forEach((track) => {
-            savedTracks.set(track.spotify_uri, track);
-          });
-
-          spotify_ids = [];
-        } else {
-          spotify_ids.push(doc.id);
-        }
+        spotify_ids.push(id);
       }
-    });
-  } catch (error) {
-    console.log(error);
+    }
   }
+} catch (error) {
+  console.log(error);
+}
+
+
 
   if (spotify_ids.length > 0) {
+    console.log("Times queried:", ++counter)
     let id_string = spotify_ids.join(",");
     let temp_tracks = await spotifyGetTracks(access_token, id_string);
 

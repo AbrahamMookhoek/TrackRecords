@@ -170,7 +170,12 @@ export async function readListeningHistoryFromFirestore(username) {
     collection(db, "users", userSnap.docs[0].id, "history"),
   );
 
-  return firestore_history;
+  const historyData = [];
+  firestore_history.forEach((doc) => {
+    historyData.push({ id: doc.id, ...doc.data() });
+  });
+
+  return historyData;
 }
 
 export async function getUserEpoch(username) {
