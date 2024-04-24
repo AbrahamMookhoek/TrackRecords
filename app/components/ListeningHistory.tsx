@@ -47,7 +47,7 @@ export default function () {
           </h4>
         )}
       </div>
-      <div className="flex w-full justify-center py-2">
+      {/* <div className="flex w-full justify-center py-2">
         <Button
           variant="contained"
           startIcon={<Add />}
@@ -55,10 +55,9 @@ export default function () {
           style={{ margin: "10px" }}
         >
           {" "}
-          {/* Added padding style to the Button */}
           New Journal Entry
         </Button>
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -17,4 +17,7 @@ export const useCalendarStore = create((set) => ({
 
   isEventSelected: false,
   setEventSelected: (value) => set({ isEventSelected: value }),
+
+  filteredPlaylists: [],
+  setFilteredPlaylists: (value) => set({ filteredPlaylists: value }),
 }));

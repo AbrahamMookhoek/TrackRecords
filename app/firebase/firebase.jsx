@@ -1,6 +1,15 @@
 import { db } from "@/app/firebase/config";
 import { Track } from "../shared_objects/Track";
-import { collection, doc, setDoc, getDocs, updateDoc, query, where, arrayUnion, getDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  setDoc,
+  getDocs,
+  updateDoc,
+  query,
+  where,
+  getDoc,
+} from "firebase/firestore";
 
 export async function writeTracksToFirestore(user_name, tracks) {
   const queryForUser = query(
@@ -22,7 +31,6 @@ export async function writeTracksToFirestore(user_name, tracks) {
       );
       await setDoc(docRef, {
         spotify_id: tracks[index].spotify_id,
-        added_at: tracks[index].added_at,
         album_image: tracks[index].album_image,
         album_name: tracks[index].album_name,
         artist_names: tracks[index].artist_names,
@@ -30,9 +38,10 @@ export async function writeTracksToFirestore(user_name, tracks) {
         track_duration: tracks[index].track_duration,
         track_link: tracks[index].track_link,
         track_name: tracks[index].track_name,
+        added_at: tracks[index].added_at,
+        played_at: tracks[index].played_at,
       });
       count += 1;
-      // console.log("Document written with ID: ", docRef.id);
     } catch (e) {
       console.error("Error adding document: ", e);
     }
@@ -55,7 +64,6 @@ export async function readTracksFromFirestore(user_name) {
     tracks.push(
       new Track(
         doc.id,
-        doc.data().added_at,
         doc.data().album_image,
         doc.data().album_name,
         doc.data().artist_names,
@@ -63,6 +71,8 @@ export async function readTracksFromFirestore(user_name) {
         doc.data().track_duration,
         doc.data().track_link,
         doc.data().track_name,
+        doc.data().added_at,
+        doc.data().played_at,
       ),
     );
   });
@@ -87,7 +97,6 @@ export async function readMonthTracksFromFirestore(user_name, month) {
     tracks.push(
       new Track(
         doc.id,
-        doc.data().added_at,
         doc.data().album_image,
         doc.data().album_name,
         doc.data().artist_names,
@@ -95,6 +104,8 @@ export async function readMonthTracksFromFirestore(user_name, month) {
         doc.data().track_duration,
         doc.data().track_link,
         doc.data().track_name,
+        doc.data().added_at,
+        doc.data().played_at,
       ),
     );
   });
@@ -104,24 +115,32 @@ export async function readMonthTracksFromFirestore(user_name, month) {
   return tracks;
 }
 
-export async function updateTracks(spotifyTotalTracks, username)
-{
-  const queryForUser = query(collection(db, "users"), where("name", "==", username));
+export async function updateTracks(spotifyTotalTracks, username) {
+  const queryForUser = query(
+    collection(db, "users"),
+    where("name", "==", username),
+  );
   const userSnap = await getDocs(queryForUser);
 
-  const queryForExistingTracks = query(collection(db, "users", userSnap.docs[0].id, "tracks"));
+  const queryForExistingTracks = query(
+    collection(db, "users", userSnap.docs[0].id, "tracks"),
+  );
   const queryForExistingTracksSnap = await getDocs(queryForExistingTracks);
 
-  if(spotifyTotalTracks == queryForExistingTracksSnap.size)
-  {
-    console.log("No need to write to Firestore, user's library has not changed");
-    return false; 
+  if (spotifyTotalTracks == queryForExistingTracksSnap.size) {
+    console.log(
+      "No need to write to Firestore, user's library has not changed",
+    );
+    return false;
   }
 
   return true;
 }
 
-export async function writeListeningHistoryToFireStore(username,listeningHistory,) {
+export async function writeListeningHistoryToFireStore(
+  username,
+  listeningHistory,
+) {
   const queryForUser = query(
     collection(db, "users"),
     where("name", "==", username),
@@ -130,64 +149,77 @@ export async function writeListeningHistoryToFireStore(username,listeningHistory
 
   const userId = userSnap.docs[0].id;
 
-  const userHistory = query(collection(db, "users", userSnap.docs[0].id, "history"));
+  const userHistory = query(
+    collection(db, "users", userSnap.docs[0].id, "history"),
+  );
   const userHistorySnap = await getDocs(userHistory);
 
-  if(userHistorySnap.size > 0)
-  {
-    console.log(userHistorySnap.size)
+  if (userHistorySnap.size > 0) {
+    console.log(userHistorySnap.size);
   }
 
   for (let [key, value] of listeningHistory) {
-      const docRef = doc(db, "users", userId, "history", key);
-      const docSnap = await getDoc(docRef)
-      const docData = docSnap.data()
+    const docRef = doc(db, "users", userId, "history", key);
+    const docSnap = await getDoc(docRef);
+    const docData = docSnap.data();
 
-      if(docData != undefined)
-      {
-      console.log("docData:", docData)
-      console.log("value:", value)
-      await updateDoc(
-        docRef, 
-        { 
-          played_at: docData.played_at.concat(value.played_at)
-        }
-      )
+    if (docData != undefined) {
+      console.log("docData:", docData);
+      console.log("value:", value);
+      await updateDoc(docRef, {
+        played_at: docData.played_at.concat(value.played_at),
+      });
+    } else {
+      console.log("NO ASSOCIATED ENTRY FOUND");
+      setDoc(docRef, { played_at: value.played_at });
     }
-      else{
-        console.log("NO ASSOCIATED ENTRY FOUND")
-        setDoc(docRef, { played_at: value.played_at });
-      }
-
   }
 }
 
-export async function readListeningHistoryFromFirestore(username) { 
+export async function readListeningHistoryFromFirestore(username) {
   const queryForUser = query(
-    collection(db, "users"), where("name", "==", username));
+    collection(db, "users"),
+    where("name", "==", username),
+  );
   const userSnap = await getDocs(queryForUser);
 
   const firestore_history = await getDocs(
     collection(db, "users", userSnap.docs[0].id, "history"),
   );
 
-  return firestore_history;
+  const historyData = [];
+  firestore_history.forEach((doc) => {
+    historyData.push({ id: doc.id, ...doc.data() });
+  });
+
+  return historyData;
 }
 
 export async function writeEntryToFireStore(username, journalEntry) {
-  const queryForUser = query(collection(db, "users"), where("name", "==", username));
+  const queryForUser = query(
+    collection(db, "users"),
+    where("name", "==", username),
+  );
   const userSnap = await getDocs(queryForUser);
 
   const userId = userSnap.docs[0].id;
 
-  const userEntries = query(collection(db, "users", userSnap.docs[0].id, "entries"));
+  const userEntries = query(
+    collection(db, "users", userSnap.docs[0].id, "entries"),
+  );
   const userEntriesSnap = await getDocs(userEntries);
 
   if (userEntriesSnap.size > 0) {
     console.log(userEntriesSnap.size);
   }
 
-  const docRef = doc(db, "users", userId, "entries", journalEntry.date.format("YYYY-MM-DD").toString());
+  const docRef = doc(
+    db,
+    "users",
+    userId,
+    "entries",
+    journalEntry.date.format("YYYY-MM-DD").toString(),
+  );
   const docSnap = await getDoc(docRef);
   const docData = docSnap.data();
 
@@ -198,7 +230,7 @@ export async function writeEntryToFireStore(username, journalEntry) {
       title: journalEntry.title,
       track: journalEntry.track.spotify_uri,
       date: journalEntry.date.format("YYYY-MM-DD").toString(),
-      content: journalEntry.content
+      content: journalEntry.content,
     });
   } else {
     console.log("NO ASSOCIATED ENTRY FOUND");
@@ -206,16 +238,21 @@ export async function writeEntryToFireStore(username, journalEntry) {
       title: journalEntry.title,
       track: journalEntry.track.spotify_uri,
       date: journalEntry.date.format("YYYY-MM-DD").toString(),
-      content: journalEntry.content
+      content: journalEntry.content,
     });
   }
 }
 
 export async function readEntriesFromFirestore(username) {
-  const queryForUser = query(collection(db, "users"), where("name", "==", username));
+  const queryForUser = query(
+    collection(db, "users"),
+    where("name", "==", username),
+  );
   const userSnap = await getDocs(queryForUser);
 
-  const entriesSnap = await getDocs(collection(db, "users", userSnap.docs[0].id, "entries"));
+  const entriesSnap = await getDocs(
+    collection(db, "users", userSnap.docs[0].id, "entries"),
+  );
 
   const firestore_entries = new Map();
 
@@ -234,7 +271,9 @@ export async function generateMasterEntryList(username) {
 
 export async function getUserEpoch(username) {
   const queryForUser = query(
-    collection(db, "users"), where("name", "==", username));
+    collection(db, "users"),
+    where("name", "==", username),
+  );
   const userSnap = await getDocs(queryForUser);
 
   var queryParam = "";

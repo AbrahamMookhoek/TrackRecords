@@ -23,16 +23,3 @@ export class Track {
     this.played_at = played_at;
   }
 }
-
-let track = new Track(
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-);

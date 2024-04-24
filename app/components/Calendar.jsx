@@ -10,13 +10,6 @@ import { createCalendarEvents, generateMasterSongList } from "../utils/spotify";
 import QuerySnackbar from "./QuerySnackbar";
 import { useRouter } from "next/navigation";
 
-const myCustomButton = {
-  text: "custom!",
-  click: function () {
-    alert("clicked the custom button!");
-  },
-};
-
 // Check if key exists in localStorage
 const isKeyExists = (key) => {
   if (typeof window !== "undefined") {
@@ -25,16 +18,16 @@ const isKeyExists = (key) => {
   return false;
 };
 
-function isDataStale(){
-  const lastQuery = localStorage.getItem("lastQuery")
+function isDataStale() {
+  const lastQuery = localStorage.getItem("lastQuery");
 
-  return lastQuery != undefined && Date.now() - lastQuery >= 30 *  60 * 1000
+  return lastQuery != undefined && Date.now() - lastQuery >= 30 * 60 * 1000;
 }
 
 export default function Calendar({ user }) {
   const calendarRef = useRef(null);
 
-  const router = useRouter()
+  const router = useRouter();
 
   const { events, setEvents } = useCalendarStore();
   const { isEventSelected, setEventSelected } = useCalendarStore();
@@ -120,12 +113,10 @@ export default function Calendar({ user }) {
 
   useEffect(() => {
     // handles the case in which the user is new
-    if(!isKeyExists("tracks"))
-    {
-      localStorage.setItem("lastQuery", Date.now())
+    if (!isKeyExists("tracks")) {
+      localStorage.setItem("lastQuery", Date.now());
 
-      if(status === "success")
-      {
+      if (status === "success") {
         // Run this block only if the key doesn't exist in localStorage and status is "success"
         let temp = createCalendarEvents(data);
         setAddedTracks(temp[0]);
@@ -141,19 +132,16 @@ export default function Calendar({ user }) {
         setShowSnackbar(true);
         setDataLoaded(true); // Mark data loading as complete
 
-        console.log("Render all the stuff")
-        console.log("Status is", status)
+        console.log("Render all the stuff");
+        console.log("Status is", status);
       }
     }
 
-    if(isKeyExists("tracks"))
-    {
-      if(isDataStale())
-      {
-        if(status === "success")
-        {
-          localStorage.setItem("lastQuery", Date.now())
-           // Run this block only if the data is stale
+    if (isKeyExists("tracks")) {
+      if (isDataStale()) {
+        if (status === "success") {
+          localStorage.setItem("lastQuery", Date.now());
+          // Run this block only if the data is stale
           let temp = createCalendarEvents(data);
           setAddedTracks(temp[0]);
           setListenedTracks(temp[1]);
@@ -168,11 +156,9 @@ export default function Calendar({ user }) {
           setShowSnackbar(true);
           setDataLoaded(true); // Mark data loading as complete
 
-          location.reload()
+          location.reload();
         }
-      }
-      else
-      {
+      } else {
         setQueryMessage("Tracks already retrieved, pulling from storage...");
         setShowSnackbar(true);
         // Retrieve the serialized map from localStorage
@@ -214,10 +200,8 @@ export default function Calendar({ user }) {
             showNonCurrentDates={false}
             height={"100%"}
             dateClick={dayClicked}
-            customButtons={{ myCustomButton }}
             headerToolbar={{
               left: "title",
-              center: "myCustomButton",
               right: "prev,next",
             }}
           />

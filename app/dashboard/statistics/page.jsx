@@ -1,10 +1,11 @@
+import Statistics from "../../components/Statistics.jsx";
 import Footer from "@/app/components/Footer";
 import Navbar from "@/app/components/Navbar";
 
 import { getServerSession } from "next-auth";
 import { options } from "@/app/api/auth/[...nextauth]/options";
 
-export default async function JournalPage() {
+export default async function StatisticsPage() {
   const session = await getServerSession(options);
 
   return (
@@ -15,7 +16,7 @@ export default async function JournalPage() {
         }
       />
       {/* <div className="col-span-full row-span-10 grid grid-cols-subgrid gap-x-2"> */}
-      <h1>IMPLEMENT STATISTICS</h1>
+      <Statistics user={session.user} />
       {/* </div> */}
       <Footer className={"flexCenter col-span-full row-span-1 w-full px-32"} />
     </div>

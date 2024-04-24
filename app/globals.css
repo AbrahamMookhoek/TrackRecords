@@ -208,3 +208,8 @@ trix-editor {
 hr {
   border-color: black;
 }
+
+#simple-tabpanel-0,
+#simple-tabpanel-1 {
+  overflow-y: scroll;
+}

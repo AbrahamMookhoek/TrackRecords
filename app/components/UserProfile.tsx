@@ -27,13 +27,15 @@ export default function UserProfile({ user }) {
   };
 
   const handleSettings = () => {
-    router.push("/dashboard/settings")
-  }
+    router.push("/dashboard/settings");
+  };
 
   return (
     <>
       <Box sx={{ display: "flex", alignItems: "center", textAlign: "center" }}>
-        <p><b>Hello, {user.name}</b></p>
+        <p>
+          <b>Hello, {user.name}</b>
+        </p>
         <Tooltip title="Account settings">
           <IconButton
             onClick={handleClick}
@@ -83,7 +85,7 @@ export default function UserProfile({ user }) {
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
         <MenuItem onClick={handleClose}>
-          <Avatar src={user.image ? user.image : ""}/> My account
+          <Avatar src={user.image ? user.image : ""} /> My account
         </MenuItem>
         <Divider />
         <MenuItem onClick={handleSettings}>

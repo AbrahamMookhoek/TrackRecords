@@ -1,40 +1,20 @@
-"use client";
 import React from "react";
-import Dropzone from "../../components/Dropzone";
+import Settings from "../../components/Settings";
+import Footer from "@/app/components/Footer";
+import Navbar from "@/app/components/Navbar";
 
 export default function SettingsPage() {
-  const handleDrop = async (acceptedFiles) => {
-    const formData = new FormData();
-    acceptedFiles.forEach((file) => {
-      formData.append("files", file);
-    });
-
-    var requestOptions = {
-      method: "POST",
-      body: formData,
-      redirect: "follow",
-    };
-
-    try {
-      const response = await fetch("/api/process", requestOptions);
-
-      if (response.ok) {
-        console.log("Files processed successfully");
-        // Optionally, you can handle success message or redirect here
-      } else {
-        console.error("Failed to process files");
-        // Optionally, you can handle error message here
-      }
-    } catch (error) {
-      console.error("Error processing files:", error);
-      // Optionally, you can handle error message here
-    }
-  };
-
   return (
-    <div className="">
-      <h1>Upload Files</h1>
-      <Dropzone onDrop={handleDrop} />
+    <div className="grid h-full max-h-screen min-h-screen grid-cols-7 grid-rows-12 gap-y-2 bg-navy-100">
+      <Navbar
+        className={
+          "flex-between col-span-full row-span-1 flex w-full justify-between px-32"
+        }
+      />
+      <div className="col-span-full row-span-10 grid gap-x-2">
+        <Settings />
+      </div>
+      <Footer className={"flexCenter col-span-full row-span-1 w-full px-32"} />
     </div>
   );
 }
