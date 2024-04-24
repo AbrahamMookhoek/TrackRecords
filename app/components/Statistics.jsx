@@ -111,100 +111,6 @@ function getArtistOverallMetrics(tracks) {
   return artistOverallMetrics;
 }
 
-function getGenresAddedMetrics(tracks) {
-  const genresAddedMetrics = new Map();
-
-  tracks.forEach((value, key) => {
-    value.genres.forEach((genre) => {
-      if (!genresAddedMetrics.has(genre)) {
-        genresAddedMetrics.set(genre, value.playlists_added_to.length);
-      } else {
-        genresAddedMetrics.set(
-          genre,
-          genresAddedMetrics.get(genre) + value.playlists_added_to.length,
-        );
-      }
-    });
-  });
-
-  return genresAddedMetrics;
-}
-
-function getGenresPlayedMetrics(tracks) {
-  const genresPlayedMetrics = new Map();
-
-  tracks.forEach((value, key) => {
-    value.genres.forEach((genre) => {
-      if (!genresPlayedMetrics.has(genre)) {
-        genresPlayedMetrics.set(genre, value.played_at.length);
-      } else {
-        genresPlayedMetrics.set(
-          genre,
-          genresPlayedMetrics.get(genre) + value.played_at.length,
-        );
-      }
-    });
-  });
-
-  return genresPlayedMetrics;
-}
-
-function getGenresOverallMetrics(tracks) {
-  const genresOverallMetrics = new Map();
-
-  tracks.forEach((value, key) => {
-    value.genres.forEach((genre) => {
-      if (!genresOverallMetrics.has(genre)) {
-        genresOverallMetrics.set(
-          genre,
-          value.played_at.length + value.playlists_added_to.length,
-        );
-      } else {
-        genresOverallMetrics.set(
-          genre,
-          genresOverallMetrics.get(genre) +
-            value.played_at.length +
-            value.playlists_added_to.length,
-        );
-      }
-    });
-  });
-
-  return genresOverallMetrics;
-}
-
-function newChart(chartid, title, labels, data, type = "pie") {
-  chartid = new Highcharts.Chart({
-    chart: {
-      renderTo: chartid,
-      type: type,
-    },
-    title: {
-      text: title,
-    },
-    xAxis: {
-      categories: labels,
-    },
-    series: [],
-  });
-  series(chartid, data);
-}
-
-function series(chartid, data) {
-  len = Object.keys(data).length;
-  for (key in data) {
-    value = data[key];
-    chartid.addSeries(
-      {
-        name: key,
-        data: value,
-      },
-      false,
-    );
-  }
-  chartid.redraw();
-}
-
 export default function Statistics({ user }) {
   const [value, setValue] = React.useState(0);
   const [dataLoaded, setDataLoaded] = useState(false); // State to track if data loading is complete
@@ -250,7 +156,7 @@ export default function Statistics({ user }) {
     }
 
     filteredTracks.sort((a, b) => {
-      console.log(a, b);
+      // console.log(a, b);
       var textA = a.track_name.toUpperCase();
       var textB = b.track_name.toUpperCase();
       return textA < textB ? -1 : textA > textB ? 1 : 0;
@@ -273,7 +179,7 @@ export default function Statistics({ user }) {
     );
 
     filteredTracks.sort((a, b) => {
-      console.log(a, b);
+      // console.log(a, b);
       var textA = a.track_name.toUpperCase();
       var textB = b.track_name.toUpperCase();
       return textA < textB ? -1 : textA > textB ? 1 : 0;
@@ -310,7 +216,7 @@ export default function Statistics({ user }) {
 
       setTracks(data);
       setFilteredData([...data.values()]);
-      console.log("serialized:", deserializedMap);
+      // console.log("serialized:", deserializedMap);
 
       setQueryMessage("Tracks queried...");
       setShowSnackbar(true);
@@ -338,11 +244,11 @@ export default function Statistics({ user }) {
         const artistPlayedMetrics = getArtistPlayedMetrics(deserializedMap);
         const artistOverallMetrics = getArtistOverallMetrics(deserializedMap);
 
-        console.log(
-          artistAddedMetrics,
-          artistPlayedMetrics,
-          artistOverallMetrics,
-        );
+        // console.log(
+        //   artistAddedMetrics,
+        //   artistPlayedMetrics,
+        //   artistOverallMetrics,
+        // );
 
         // create variables to store respective top 10 artist values
         var topAddedArtists = [];
@@ -876,224 +782,6 @@ export default function Statistics({ user }) {
     }
   }, [data, status]);
 
-  // calculate genre metrics
-  // const genresAddedMetrics = getGenresAddedMetrics(tracks);
-  // const genresPlayedMetrics = getGenresPlayedMetrics(tracks);
-  // const genresOverallMetrics = getGenresOverallMetrics(tracks);
-
-  // // convert genre maps into arrays of objects
-  // const genresAddedArray = Array.from(genresAddedMetrics, ([genre, value]) => ({ genre, value }));
-  // const genresPlayedArray = Array.from(genresPlayedMetrics, ([genre, value]) => ({ genre, value }));
-  // const genresOverallArray = Array.from(genresOverallMetrics, ([genre, value]) => ({ genre, value }));
-
-  // console.log("genreAddedArray: ",genresAddedArray);
-
-  // // create the added genre pie chart options
-  // const genresAddedOptions = {
-  //   chart: {
-  //     type: "pie",
-  //   },
-  //   title: {
-  //     text: "Added Genres",
-  //   },
-  //   tooltip: {
-  //     valueSuffix: "%",
-  //   },
-  //   subtitle: {
-  //     text: 'Source:<a href="https://www.mdpi.com/2072-6643/11/3/684/htm" target="_default">MDPI</a>',
-  //   },
-  //   plotOptions: {
-  //     series: {
-  //       allowPointSelect: true,
-  //       cursor: "pointer",
-  //       dataLabels: [
-  //         {
-  //           enabled: true,
-  //           distance: 20,
-  //         },
-  //         {
-  //           enabled: true,
-  //           distance: -40,
-  //           format: "{point.percentage:.1f}%",
-  //           style: {
-  //             fontSize: "1.2em",
-  //             textOutline: "none",
-  //             opacity: 0.7,
-  //           },
-  //           filter: {
-  //             operator: ">",
-  //             property: "percentage",
-  //             value: 10,
-  //           },
-  //         },
-  //       ],
-  //     },
-  //   },
-  //   series: [
-  //     {
-  //       name: "Percentage",
-  //       colorByPoint: true,
-  //       data: [
-  //         {
-  //           name: "Water",
-  //           y: 55.02,
-  //         }
-  //       ],
-  //     },
-  //   ],
-  // };
-
-  // // create the played genre pie chart options
-  // const genresPlayedOptions = {
-  //   chart: {
-  //     type: "pie",
-  //   },
-  //   title: {
-  //     text: "Played Genres",
-  //   },
-  //   tooltip: {
-  //     valueSuffix: "%",
-  //   },
-  //   subtitle: {
-  //     text: 'Source:<a href="https://www.mdpi.com/2072-6643/11/3/684/htm" target="_default">MDPI</a>',
-  //   },
-  //   plotOptions: {
-  //     series: {
-  //       allowPointSelect: true,
-  //       cursor: "pointer",
-  //       dataLabels: [
-  //         {
-  //           enabled: true,
-  //           distance: 20,
-  //         },
-  //         {
-  //           enabled: true,
-  //           distance: -40,
-  //           format: "{point.percentage:.1f}%",
-  //           style: {
-  //             fontSize: "1.2em",
-  //             textOutline: "none",
-  //             opacity: 0.7,
-  //           },
-  //           filter: {
-  //             operator: ">",
-  //             property: "percentage",
-  //             value: 10,
-  //           },
-  //         },
-  //       ],
-  //     },
-  //   },
-  //   series: [
-  //     {
-  //       name: "Percentage",
-  //       colorByPoint: true,
-  //       data: [
-  //         {
-  //           name: "Water",
-  //           y: 55.02,
-  //         }
-  //       ],
-  //     },
-  //   ],
-  // };
-
-  // // create the overall genre pie chart options
-  // const genresOverallOptions = {
-  //   chart: {
-  //     type: "pie",
-  //   },
-  //   title: {
-  //     text: "Played Genres",
-  //   },
-  //   tooltip: {
-  //     valueSuffix: "%",
-  //   },
-  //   subtitle: {
-  //     text: 'Source:<a href="https://www.mdpi.com/2072-6643/11/3/684/htm" target="_default">MDPI</a>',
-  //   },
-  //   plotOptions: {
-  //     series: {
-  //       allowPointSelect: true,
-  //       cursor: "pointer",
-  //       dataLabels: [
-  //         {
-  //           enabled: true,
-  //           distance: 20,
-  //         },
-  //         {
-  //           enabled: true,
-  //           distance: -40,
-  //           format: "{point.percentage:.1f}%",
-  //           style: {
-  //             fontSize: "1.2em",
-  //             textOutline: "none",
-  //             opacity: 0.7,
-  //           },
-  //           filter: {
-  //             operator: ">",
-  //             property: "percentage",
-  //             value: 10,
-  //           },
-  //         },
-  //       ],
-  //     },
-  //   },
-  //   series: [
-  //     {
-  //       name: "Percentage",
-  //       colorByPoint: true,
-  //       data: [
-  //         {
-  //           name: "Water",
-  //           y: 55.02,
-  //         }
-  //       ],
-  //     },
-  //   ],
-  // };
-
-  // create the track analysis graph
-  const trackOptions = {
-    chart: {
-      backgroundColor: "rgba(0,0,0,0)",
-      polar: true,
-      type: "line",
-    },
-
-    title: {
-      text: "Track Metrics",
-    },
-
-    xAxis: {
-      categories: [
-        "Acousticness",
-        "Danceability",
-        "Energy",
-        "Instrumentalness",
-        "Liveness",
-        "Loudness",
-        "tempo (BPM)",
-        "Valence",
-      ],
-      tickmarkPlacement: "on",
-      lineWidth: 0,
-    },
-
-    yAxis: {
-      gridLineInterpolation: "polygon",
-      lineWidth: 0,
-      min: 0,
-    },
-
-    series: [
-      {
-        name: "Track Name",
-        data: [1, 2, 3, 4, 5, 6, 7, 8],
-      },
-    ],
-  };
-
   return (
     <div className="relative col-span-full row-span-10 mx-32 flex flex-col rounded-lg bg-light_blue-100 p-2 text-black shadow-lg">
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
@@ -1103,7 +791,6 @@ export default function Statistics({ user }) {
           aria-label="basic tabs example"
         >
           <Tab label="Overview" {...a11yProps(0)} />
-          <Tab label="Genre" {...a11yProps(1)} />
           <Tab label="Tracks" {...a11yProps(2)} />
         </Tabs>
       </Box>
@@ -1138,9 +825,6 @@ export default function Statistics({ user }) {
         </div>
       </CustomTabPanel>
       <CustomTabPanel value={value} index={1}>
-        Genre
-      </CustomTabPanel>
-      <CustomTabPanel value={value} index={2}>
         <div className="flex justify-between gap-x-4">
           <TextField
             label="Search"
@@ -1172,12 +856,6 @@ export default function Statistics({ user }) {
           </Menu>
         </div>
         <div className="mt-1 grid grid-cols-4 gap-4">
-          {/* {dataLoaded && (
-            <>
-              <HighchartsReact highcharts={Highcharts} options={trackOptions} />
-              <HighchartsReact highcharts={Highcharts} options={trackOptions} />
-            </>
-          )} */}
           {dataLoaded && (
             <>
               {filteredData.map((track) => {
@@ -1185,14 +863,13 @@ export default function Statistics({ user }) {
                   <StatTrackCard
                     key={track.spotify_uri}
                     track={track}
+                    user={user}
                   ></StatTrackCard>
                 );
               })}
-            </> // bro is coooooking
+            </>
           )}
         </div>
-
-        {/*Track Metrics */}
       </CustomTabPanel>
       <QuerySnackbar
         open={showSnackbar}

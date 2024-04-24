@@ -16,7 +16,7 @@ export default async function StatisticsPage() {
         }
       />
       {/* <div className="col-span-full row-span-10 grid grid-cols-subgrid gap-x-2"> */}
-      <Statistics user={session.user}/>
+      <Statistics user={session.user} />
       {/* </div> */}
       <Footer className={"flexCenter col-span-full row-span-1 w-full px-32"} />
     </div>

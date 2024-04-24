@@ -35,7 +35,7 @@ export default async function refreshAccessToken(refresh_token) {
 
 // Import or define sleep function
 async function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 // Modify spotifyGetTracks function
@@ -57,60 +57,103 @@ export async function spotifyGetTracks(access_token, track_ids) {
       "https://api.spotify.com/v1/tracks?ids=" + track_ids,
       requestOptions,
     )
-    .then(async (response) => {
-      if (response.ok) {
-        return response.json();
-      } else if (response.status === 429) {
-        // If 429 (too many requests), implement exponential backoff
-        console.log("Too many requests. Retrying...");
-        await sleep(30000); // Initial wait time, 30 seconds
-        return spotifyGetTracks(access_token, track_ids); // Retry
-      } else {
-        throw new Error('Request failed with status ' + response.status);
-      }
-    })
-    .then((result) => {
-      // Process result
-      var artistsNameArray = [];
-      var artistsLinkArray = [];
-      var genresArray = [];
+      .then(async (response) => {
+        if (response.ok) {
+          return response.json();
+        } else if (response.status === 429) {
+          // If 429 (too many requests), implement exponential backoff
+          console.log("Too many requests. Retrying...");
+          await sleep(30000); // Initial wait time, 30 seconds
+          return spotifyGetTracks(access_token, track_ids); // Retry
+        } else {
+          throw new Error("Request failed with status " + response.status);
+        }
+      })
+      .then((result) => {
+        // Process result
+        var artistsNameArray = [];
+        var artistsLinkArray = [];
+        var genresArray = [];
 
-      if (result != undefined) {
-        result.tracks.forEach((track) => {
-          artistsNameArray = [];
-          artistsLinkArray = [];
-          genresArray = [];
+        if (result != undefined) {
+          result.tracks.forEach((track) => {
+            artistsNameArray = [];
+            artistsLinkArray = [];
+            genresArray = [];
 
-          track.artists.forEach((artist) => {
-            artistsNameArray.push(artist.name);
-            artistsLinkArray.push(artist.external_urls.spotify);
-            genresArray = artist.genres;
+            track.artists.forEach((artist) => {
+              artistsNameArray.push(artist.name);
+              artistsLinkArray.push(artist.external_urls.spotify);
+              genresArray = artist.genres;
+            });
+
+            temp_tracks.push(
+              new Track(
+                track.uri.split(":").pop(),
+                genresArray,
+                track.album.images.length !== 0
+                  ? track.album.images[track.album.images.length - 1].url
+                  : "Unknown",
+                track.album.name,
+                artistsNameArray,
+                artistsLinkArray,
+                track.duration_ms,
+                track.external_urls.spotify,
+                track.name,
+                [],
+                [],
+              ),
+            );
           });
-
-          temp_tracks.push(
-            new Track(
-              track.uri.split(":").pop(),
-              genresArray,
-              track.album.images.length !== 0 ? track.album.images[track.album.images.length - 1].url : "Unknown",
-              track.album.name,
-              artistsNameArray,
-              artistsLinkArray,
-              track.duration_ms,
-              track.external_urls.spotify,
-              track.name,
-              [],
-              [],
-            ),
-          );
-        });
-      }
-    })
-    .catch((error) => console.log("error", error));
+        }
+      })
+      .catch((error) => console.log("error", error));
   } catch (error) {
     console.log("Error fetching tracks:", error);
   }
 
   return temp_tracks;
+}
+
+export async function getTracksFeatures(access_token, track_id) {
+  var myHeaders = new Headers();
+  myHeaders.append("Authorization", "Bearer " + access_token);
+
+  var requestOptions = {
+    method: "GET",
+    headers: myHeaders,
+    redirect: "follow",
+  };
+
+  let a = {};
+
+  try {
+    // Fetch tracks
+    await fetch(
+      "https://api.spotify.com/v1/audio-features/" + track_id,
+      requestOptions,
+    )
+      .then(async (response) => {
+        if (response.ok) {
+          return response.json();
+        } else if (response.status === 429) {
+          // If 429 (too many requests), implement exponential backoff
+          console.log("Too many requests. Retrying...");
+          await sleep(30000); // Initial wait time, 30 seconds
+          return spotifyGetTracks(access_token, track_ids); // Retry
+        } else {
+          throw new Error("Request failed with status " + response.status);
+        }
+      })
+      .then((result) => {
+        a = result;
+      })
+      .catch((error) => console.log("error", error));
+  } catch (error) {
+    console.log("Error fetching tracks:", error);
+  }
+
+  return a;
 }
 
 export async function spotifyGetSavedTracks(access_token) {
@@ -157,7 +200,10 @@ export async function spotifyGetSavedTracks(access_token) {
             new Track(
               item.track.uri.split(":").pop(),
               genresArray,
-              item.track.album.images.length !== 0 ? item.track.album.images[item.track.album.images.length - 1].url : "Unknown",
+              item.track.album.images.length !== 0
+                ? item.track.album.images[item.track.album.images.length - 1]
+                    .url
+                : "Unknown",
               item.track.album.name,
               artistsNameArray,
               artistsLinkArray,
@@ -204,7 +250,10 @@ export async function spotifyGetSavedTracks(access_token) {
               new Track(
                 item.track.uri.split(":").pop(),
                 genresArray,
-                item.track.album.images.length !== 0 ? item.track.album.images[item.track.album.images.length - 1].url : "Unknown",
+                item.track.album.images.length !== 0
+                  ? item.track.album.images[item.track.album.images.length - 1]
+                      .url
+                  : "Unknown",
                 item.track.album.name,
                 artistsNameArray,
                 artistsLinkArray,
@@ -271,7 +320,6 @@ export async function getRecentlyPlayed(access_token, username) {
     .then((result) => {
       count += result.items.length;
       if (result.items != undefined) {
-
         count += result.items.length;
 
         result.items.forEach((item) => {
@@ -290,7 +338,10 @@ export async function getRecentlyPlayed(access_token, username) {
               new Track(
                 item.track.uri.split(":").pop(),
                 genresArray,
-                item.track.album.images.length !== 0 ? item.track.album.images[item.track.album.images.length - 1].url : "Unknown",
+                item.track.album.images.length !== 0
+                  ? item.track.album.images[item.track.album.images.length - 1]
+                      .url
+                  : "Unknown",
                 item.track.album.name,
                 artistsNameArray,
                 artistsLinkArray,
@@ -433,7 +484,11 @@ export async function generateMasterSongList(access_token, username) {
       let trackObj = new Track(
         playlistItem.track.uri.split(":").pop(),
         genresArray,
-        playlistItem.track.album.images.length !== 0 ? playlistItem.track.album.images[playlistItem.track.album.images.length - 1].url : "Unknown",
+        playlistItem.track.album.images.length !== 0
+          ? playlistItem.track.album.images[
+              playlistItem.track.album.images.length - 1
+            ].url
+          : "Unknown",
         playlistItem.track.album.name,
         artistsNameArray,
         artistsLinkArray,
@@ -477,40 +532,38 @@ export async function generateMasterSongList(access_token, username) {
     console.log(error);
   }
 
-// Modify code calling the function
-var spotify_ids = [];
-var counter = 0;
+  // Modify code calling the function
+  var spotify_ids = [];
+  var counter = 0;
 
-try {
-  for (const doc of listening_history) {
-    const id = doc.id;
-    if (savedTracks.has(id)) {
-      let trackObj = savedTracks.get(id);
-      trackObj.played_at = trackObj.played_at.concat(doc.played_at);
-    } else {
-      if (spotify_ids.length === 50) {
-        console.log("Times queried:", ++counter)
-        let id_string = spotify_ids.join(",");
-        let temp_tracks = await spotifyGetTracks(access_token, id_string);
-
-        temp_tracks.forEach((track) => {
-          savedTracks.set(track.spotify_uri, track);
-        });
-
-        spotify_ids = [];
+  try {
+    for (const doc of listening_history) {
+      const id = doc.id;
+      if (savedTracks.has(id)) {
+        let trackObj = savedTracks.get(id);
+        trackObj.played_at = trackObj.played_at.concat(doc.played_at);
       } else {
-        spotify_ids.push(id);
+        if (spotify_ids.length === 50) {
+          console.log("Times queried:", ++counter);
+          let id_string = spotify_ids.join(",");
+          let temp_tracks = await spotifyGetTracks(access_token, id_string);
+
+          temp_tracks.forEach((track) => {
+            savedTracks.set(track.spotify_uri, track);
+          });
+
+          spotify_ids = [];
+        } else {
+          spotify_ids.push(id);
+        }
       }
     }
+  } catch (error) {
+    console.log(error);
   }
-} catch (error) {
-  console.log(error);
-}
-
-
 
   if (spotify_ids.length > 0) {
-    console.log("Times queried:", ++counter)
+    console.log("Times queried:", ++counter);
     let id_string = spotify_ids.join(",");
     let temp_tracks = await spotifyGetTracks(access_token, id_string);
 
