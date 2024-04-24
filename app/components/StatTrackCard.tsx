@@ -196,7 +196,7 @@ export default function ({ track, user }) {
           <div className="flex flex-row justify-between leading-normal">
             <p className="text-md pl-1 font-bold tracking-tight text-gray-900 dark:text-white">
               <a href={track?.track_link}>
-                {truncateString(track?.track_name, 40)}
+                {truncateString(track?.track_name, 32)}
               </a>
             </p>
           </div>
@@ -207,7 +207,6 @@ export default function ({ track, user }) {
         </div>
       </a>
       <Popover
-        id={id}
         open={open}
         anchorEl={anchorEl}
         onClose={handleClose}

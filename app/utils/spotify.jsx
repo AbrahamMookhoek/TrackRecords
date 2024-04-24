@@ -427,7 +427,6 @@ async function getAllPlaylistsAndTracks(access_token, username) {
         }));
         tracksToReturn.push(...tracksWithPlaylistInfo);
       }
-      break;
     }
 
     return tracksToReturn;
